@@ -22,6 +22,7 @@ tasks/*/temp/
 
 # --- Secrets ---
 .Renviron
+.env
 
 # --- Archive / deprecated task areas ---
 tasks/_deprecated/
