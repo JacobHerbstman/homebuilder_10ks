@@ -33,24 +33,34 @@ filing_index <- read_csv("../input/sec_10k_filing_index.csv", show_col_types = F
     fiscal_year = as_task_int(fiscal_year),
     filing_date = suppressWarnings(as.Date(filing_date)),
     report_date = suppressWarnings(as.Date(report_date)),
-    cik10 = as.character(cik10)
+    cik10 = as.character(cik10),
+    accession_number = as.character(accession_number),
+    ticker = as.character(ticker)
   ) |>
   filter(!is.na(accession_number))
 
 download_inventory <- read_csv("../input/sec_10k_download_inventory.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     fiscal_year = as_task_int(fiscal_year),
-    cik10 = as.character(cik10)
+    cik10 = as.character(cik10),
+    accession_number = as.character(accession_number),
+    ticker = as.character(ticker)
   ) |>
   filter(!is.na(accession_number))
 
 land_candidates <- read_csv("../input/tenk_land_candidates.csv", show_col_types = FALSE, na = c("", "NA")) |>
-  mutate(cik10 = as.character(cik10)) |>
+  mutate(
+    cik10 = as.character(cik10),
+    accession_number = as.character(accession_number),
+    ticker = as.character(ticker)
+  ) |>
   filter(!is.na(accession_number))
 
 mention_flags <- read_csv("../input/tenk_land_mention_flags.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     cik10 = as.character(cik10),
+    accession_number = as.character(accession_number),
+    ticker = as.character(ticker),
     land_term_hit_count = as_task_int(land_term_hit_count)
   ) |>
   filter(!is.na(accession_number))
@@ -92,7 +102,7 @@ first_filing_year <- filing_index |>
   filter(!is.na(fiscal_year)) |>
   group_by(cik10) |>
   summarise(
-    first_sec_fiscal_year = min(fiscal_year, na.rm = TRUE),
+    first_sec_fiscal_year = if (all(is.na(fiscal_year))) NA_integer_ else min(fiscal_year, na.rm = TRUE),
     first_sec_report_date = if (all(is.na(report_date))) as.Date(NA) else min(report_date, na.rm = TRUE),
     .groups = "drop"
   )
@@ -125,7 +135,7 @@ sec_download_status_audit <- download_inventory |>
 land_hit_counts <- mention_flags |>
   group_by(cik10, accession_number) |>
   summarise(
-    land_term_hit_count = max(coalesce(land_term_hit_count, 0L), na.rm = TRUE),
+    land_term_hit_count = if (all(is.na(land_term_hit_count))) 0L else max(coalesce(land_term_hit_count, 0L), na.rm = TRUE),
     parser_row_present = TRUE,
     .groups = "drop"
   )

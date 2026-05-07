@@ -20,18 +20,16 @@ SEC_REQUESTS_PER_SECOND=4
 SEC_PULL_DATE=20260507
 ```
 
-Load the environment before running the task:
+Run the task with Make:
 
 ```bash
 cd /path/to/homebuilder_10ks
-set -a
-source .env
-set +a
-
 cd tasks/audit_sec_coverage/code
 make
 ```
 
-`SEC_REQUESTS_PER_SECOND=4` keeps requests well below the SEC maximum. `SEC_PULL_DATE` fixes the raw-data cache folder date so a replication run writes to a deterministic raw directory. Set `SEC_FORCE=1` only if you intentionally want to refresh already-cached SEC files.
+The SEC fetch task Makefiles symlink the repo-root `.env` into their task-local `input/` folders and source that symlink before calling Python. If `.env` is missing, Make stops with a setup error telling the runner to copy `.env.example` and set `SEC_USER_AGENT`.
+
+`SEC_REQUESTS_PER_SECOND=4` keeps requests well below the SEC maximum. `SEC_PULL_DATE` fixes the raw-data cache folder date so a replication run writes to a deterministic raw directory. Set `SEC_FORCE=1` in `.env` only if you intentionally want to refresh already-cached SEC files.
 
 The local `.env` file is ignored by git. Do not commit personal contact information or hard-code a user agent in the Python fetch scripts.
