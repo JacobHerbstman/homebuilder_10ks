@@ -1,0 +1,54 @@
+builder_name_key,ticker,cik,sec_company_name,sec_reporting_indicator,public_parent_no_comparable_us_10k,manual_review_indicator,valid_from_year,valid_to_year,notes
+d r horton,DHI,882184,D R HORTON INC,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+pulte homes,PHM,822416,PULTEGROUP INC,TRUE,FALSE,FALSE,2004,2010,Historical Builder name maps to PulteGroup SEC reporter.
+centex corp,CTX,,Centex Corp,FALSE,FALSE,TRUE,2004,2010,Acquired by Pulte; needs historical CIK review.
+nvr,NVR,906163,NVR INC,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+kb home,KBH,795266,KB HOME,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+the ryland group,RYL,85974,RYLAND GROUP INC,TRUE,FALSE,FALSE,2004,2015,Historical public builder; acquired/merged into CalAtlantic.
+beazer homes,BZH,915840,BEAZER HOMES USA INC,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+hovnanian enterprises,HOV,357294,HOVNANIAN ENTERPRISES INC,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+toll brothers,TOL,794170,TOLL BROTHERS INC,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+m d c holdings,MDC,773141,MDC HOLDINGS INC,TRUE,FALSE,FALSE,2004,2024,Historical public builder; acquired by Sekisui in 2024.
+standard pacific corp,SPF,878560,STANDARD PACIFIC CORP,TRUE,FALSE,FALSE,2004,2015,Historical public builder; CIK later associated with CalAtlantic.
+m i homes,MHO,799292,M/I HOMES INC,TRUE,FALSE,FALSE,2004,,Current public builder seed.
+technical olympic usa,TOA,,TOUSA INC,FALSE,FALSE,TRUE,2004,2007,Historical public builder needing CIK/manual bankruptcy review.
+meritage corp,MTH,833079,MERITAGE HOMES CORP,TRUE,FALSE,FALSE,2004,2004,Historical Builder name maps to Meritage Homes.
+weyerhaeuser real estate co,WY,106535,WEYERHAEUSER CO,TRUE,TRUE,TRUE,2004,2014,Public parent is not a directly comparable homebuilder 10-K.
+morrison homes,,,Morrison Homes,FALSE,FALSE,TRUE,2004,2007,Historical public/private status needs manual review.
+william lyon homes,WLH,,WILLIAM LYON HOMES,FALSE,FALSE,TRUE,2004,2020,Historical public builder needing CIK review.
+taylor woodrow homes,,,Taylor Woodrow Homes,FALSE,TRUE,TRUE,2004,2007,Foreign/public parent structure not comparable without manual review.
+jim walter homes,,,Jim Walter Homes,FALSE,FALSE,TRUE,2004,2008,Historical public-parent status needs manual review.
+dominion homes,,,Dominion Homes,FALSE,FALSE,TRUE,2004,2014,Historical public status needs manual review.
+wci communities,WCI,,WCI COMMUNITIES INC,FALSE,FALSE,TRUE,2004,2017,Historical public builder needing CIK review.
+orleans homebuilders,OHB,,ORLEANS HOMEBUILDERS INC,FALSE,FALSE,TRUE,2004,2015,Historical public builder needing CIK review.
+brookfield homes corp,,,Brookfield Homes Corp,FALSE,TRUE,TRUE,2004,2011,Public/foreign parent comparability requires manual review.
+avatar holdings,AVHI,39677,AVATAR HOLDINGS INC,TRUE,FALSE,FALSE,2004,2011,Historical name for AV Homes.
+levitt and sons,,,Levitt and Sons,FALSE,FALSE,TRUE,2004,2007,Historical public status needs manual review.
+capital pacific holdings,,,Capital Pacific Holdings,FALSE,FALSE,TRUE,2004,2010,Historical public status needs manual review.
+st joe co,JOE,745308,ST JOE CO,TRUE,TRUE,TRUE,2004,2004,Public company but not a directly comparable production-builder 10-K.
+lennar corp,LEN,920760,LENNAR CORP,TRUE,FALSE,FALSE,2005,,Current public builder seed.
+meritage homes corp,MTH,833079,MERITAGE HOMES CORP,TRUE,FALSE,FALSE,2005,2023,Historical Builder name maps to Meritage Homes.
+st joe towns and resorts,JOE,745308,ST JOE CO,TRUE,TRUE,TRUE,2005,2005,Public parent is not directly comparable.
+comstock holding co,CHCI,1299969,COMSTOCK HOLDING COMPANIES INC,TRUE,FALSE,FALSE,2006,2016,Small public builder/developer; include but review comparability.
+taylor morrison,TMHC,1562476,TAYLOR MORRISON HOME CORP,TRUE,FALSE,FALSE,2008,,Current public builder seed.
+wl homes,,,WL Homes,FALSE,FALSE,TRUE,2008,2008,Historical public status needs manual review.
+engle homes division of tousa homes,TOA,,TOUSA INC,FALSE,FALSE,TRUE,2008,2008,Division of TOUSA; needs manual CIK review.
+suncor development co,,,SunCor Development Co,FALSE,FALSE,TRUE,2008,2009,Historical public status needs manual review.
+pultegroup,PHM,822416,PULTEGROUP INC,TRUE,FALSE,FALSE,2011,,Current public builder seed.
+brookfield residential properties,,,Brookfield Residential Properties,FALSE,TRUE,TRUE,2012,2026,Foreign/public parent comparability requires manual review.
+av homes formerly avatar holdings,AVHI,39677,AV HOMES INC,TRUE,FALSE,FALSE,2012,2012,Historical Builder name maps to AV Homes.
+lgi homes,LGIH,1580670,LGI HOMES INC,TRUE,FALSE,FALSE,2014,,Current public builder seed.
+tri pointe homes,TPH,1561680,TRI POINTE HOMES INC,TRUE,FALSE,FALSE,2014,,Current public builder seed.
+av homes,AVHI,39677,AV HOMES INC,TRUE,FALSE,FALSE,2014,2018,Historical public builder.
+century communities,CCS,1576940,CENTURY COMMUNITIES INC,TRUE,FALSE,FALSE,2015,,Current public builder seed.
+risewell homes,NWHM,,THE NEW HOME CO INC,FALSE,FALSE,TRUE,2015,2021,Formerly The New Home Company; needs historical CIK review.
+ucp,UCP,1572684,UCP INC,TRUE,FALSE,FALSE,2015,2017,Historical public builder.
+calatlantic group,CAA,878560,CALATLANTIC GROUP INC,TRUE,FALSE,FALSE,2016,2018,Historical public builder; successor to Standard Pacific/Ryland.
+green brick partners,GRBK,1373670,GREEN BRICK PARTNERS INC,TRUE,FALSE,FALSE,2016,,Current public builder seed.
+meritage homes,MTH,833079,MERITAGE HOMES CORP,TRUE,FALSE,FALSE,2019,,Current public builder seed.
+dream finders homes,DFH,1825088,DREAM FINDERS HOMES INC,TRUE,FALSE,FALSE,2021,,Current public builder seed.
+landsea homes,LSEA,1721386,LANDSEA HOMES CORP,TRUE,FALSE,FALSE,2021,2025,Public builder seed; delisted/acquired status to monitor.
+amh,AMH,1562401,AMERICAN HOMES 4 RENT,TRUE,FALSE,TRUE,2021,,Build-to-rent/REIT-adjacent; keep but flag non-comparable.
+sekisui house u s,,,Sekisui House U.S.,FALSE,TRUE,TRUE,2024,,Foreign public parent; no comparable U.S. SEC 10-K expected.
+smith douglas homes,SDHC,,SMITH DOUGLAS HOMES CORP,TRUE,FALSE,FALSE,2024,,Current public ticker; CIK filled from SEC ticker map when available.
+united homes group,UHG,,UNITED HOMES GROUP INC,TRUE,FALSE,FALSE,2024,,Current public ticker; CIK filled from SEC ticker map when available.
