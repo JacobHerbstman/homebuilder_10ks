@@ -1,0 +1,128 @@
+# Homebuilder 10-Ks Project Guidelines
+
+## Data Analysis workflow
+- This project uses a task-based workflow. Every task in the paper has a dedicated folder in `tasks/` with its own `code/`, `input/`, and `output/` subfolders.
+- Each task should have its own makefile. Each makefile should be as clean and simple as possible to make them readable.
+- In makefiles, limit comments and additional targets such as ``clean''. Typical makefiles should only have a default ``all'' target and a ``link-inputs'' target.
+- Tasks that run many regression specifications, for example, should call only true specification arguments from the Makefile and use loops in the Makefile to create target filenames for each specification.
+  Then the R script should read in those specification arguments from the command line and produce the corresponding output file, named according to the arguments in the Makefile.
+  Do not pass fixed task-local input/output file paths as command-line arguments.
+- Tasks that use output from ``upstream`` tasks should use symlinking and makefiles to connect them together.
+  It should be easy to trace the path out via makefiles from the `data_raw/` folder to final outputs.
+- This project follows the logbook/Dingel task workflow: task-local Makefiles declare concrete file targets and prerequisites, and shared `tasks/generic.make` handles recursive upstream checks.
+- `make` in `paper/` is the end-to-end paper entry point. It should compile the paper and chase task-generated figures/tables upstream through Make only when those prerequisites are missing or stale.
+
+  ## Project Structure
+- `paper/` - LaTeX paper and sections
+- `slides/` - Presentation slides
+- `data_raw/` - Raw data files (not to be modified)
+- `tasks/` - Analysis tasks, each with `code/`, `input/`, and `output/` subfolders
+- R scripts in `tasks/*/code/` generate outputs (tables, figures) used by the paper
+
+## Compiling the Paper
+- Always use `make` in the `paper/` folder to compile LaTeX
+- Use version control (e.g., Git) to track changes in both code and paper, leave clear and simple commit messages
+- Always execute tasks by running `make` from the `code` folder within any task and make sure all paths are relative
+- Do NOT use `latexmk` directly
+
+## Workflow
+- When modifying tables/figures, edit the R script that generates them, not the output files directly
+- After running R scripts that update outputs, recompile the paper with `make` in `paper/`
+
+## Modeling Guardrails
+- Do NOT use `log1p`, inverse-hyperbolic-sine (arcsinh), or similar "zero-handling hacks" in place of log transforms.
+- If a logged outcome has zeros, handle them by dropping zero observations for the logged specification unless explicitly instructed otherwise.
+
+## Join Safety Standard
+- Never use many-to-many joins in active task code.
+- Before joining, validate that the join keys are unique on the side that should be unique, or collapse duplicate keys upstream with explicit source-priority or aggregation logic and QC output.
+- Do not silence dplyr many-to-many warnings with `relationship = "many-to-many"`. If `relationship` is used, use it to assert the expected one-to-one, many-to-one, or one-to-many contract.
+- If a join would be many-to-many, fix the producer/root data issue first instead of expanding rows downstream.
+
+## Make Incrementality Rules
+- Do not maintain a broad manual phase runner as the canonical dependency graph. File-level prerequisites in task Makefiles and `paper/Makefile` are the source of truth.
+- Active task Makefiles should include `../../generic.make`, which provides the shared recursive upstream rule for `../../<task>/output/...` prerequisites.
+- Do not call recursive upstream builds ad hoc inside active task symlink/input recipes. Recursive upstream checks belong in `tasks/generic.make` or explicit paper-side task-output rules.
+- Recursive upstream checks should preserve Make incrementality: they may invoke the upstream task Makefile, but upstream outputs should only rebuild when missing or stale relative to their own prerequisites.
+- `link-inputs` should only create symlinks and should not orchestrate upstream task execution.
+- Each symlink input should depend on the specific upstream output file path, not on broad/coarse gate files when avoidable.
+- Symlink recipes should be idempotent: check the existing `readlink "$@"` target before running `ln -sf`, so recursive upstream checks do not refresh input mtimes when the link is already correct.
+- Prefer narrow dependency edges over single-report anchors that can trigger unnecessary relinking and downstream invalidation.
+- Stamp-file workflows can obscure real dependency edges; use them sparingly and only when there is no clearer file-target alternative.
+- Before expensive runs, prefer `make -n` to inspect what will rebuild.
+- Do not duplicate Make's incrementality inside active scripts with executable `!exists(...)`, `file.exists(...)`, or "skip if already built" branches.
+
+## Makefile Readability Rules
+- Keep Makefiles minimal, linear, and easy to scan.
+- Keep comments brief and structural only.
+- Keep default workflow targets limited to essentials (`all`, `link-inputs`, and task-specific essential file targets).
+- Keep one concise recipe per logical output producer.
+- Keep output and input names explicit and traceable.
+- Order active task Makefiles in a standard top-down cascade: `all`, output-producing target rules, input symlink target rules, `link-inputs`, then shared includes.
+- Output files should appear as Make targets before the input symlink targets they depend on, so the reader starts from what the task produces and then traces prerequisites downward.
+- This repo uses GNU Make 3.81, so do not use ordinary multiple-target producer rules for scripts that write several outputs; they can rerun the same script once per target. Instead, use one canonical output as the producer target and make the other outputs depend on that canonical output.
+- Favor readability over clever Make metaprogramming unless scale requires it.
+
+## Makefile Path Style
+- Write file paths directly in targets and recipes.
+- Do not use path indirection blocks like `*_IN`, `*_UP`, `*_OUT`, `INPUT`, `OUTPUTS`, or similar path alias variables.
+- Keep only scalar/config variables in Makefiles (dates, thresholds, flags, spec lists, tool executables).
+- Do not pass fixed task-local file paths from Make to R/Python scripts. A fixed input such as `../input/foo.csv` or fixed output such as `../output/bar.csv` should be written directly in the script.
+- Makefile command-line arguments are reserved for real analytical variation: specifications, outcomes, fixed-effect choices, clustering choices, samples, periods, control sets, thresholds, or other scalar/config values.
+- If a task has no real analytical variation, its Make recipe should usually call the script with no arguments, for example `$(R) $<`.
+
+## RStudio Interactive Block Standard
+- For every active R script that accepts CLI arguments, include a top-of-file commented interactive block.
+- That block must include:
+  - a commented `setwd(...)` line to the task `code/` folder
+  - one commented named assignment line per example CLI argument, in CLI order, using the exact variable names used by the script's interactive fallback or CLI unpacking
+- Scripts with no CLI arguments should usually include only the commented `setwd(...)` line.
+- Do not include a commented `Rscript ...` line in the interactive block.
+- Do not include bundled commented argument vectors/lists (for example, no `args <- c(...)` block).
+- Do not include placeholder paths such as `tasks/"task"/code`.
+- Interactive examples must mirror current Makefile defaults/paths and run end-to-end when uncommented from the task `code/` directory.
+- CLI parsing remains canonical for non-interactive runs; interactive blocks are for readability/debugging only.
+- For interactive runs, scripts may either unpack CLI args into named variables once near the top or rebuild `args`/`cli_args` from the uncommented named variables before validation.
+- Do not use executable `!exists(...)` checks as the bridge between interactive runs and CLI runs; use direct positional-arg validation plus one named unpacking block instead.
+
+## Script Path Style (R + Python)
+- Fixed task-local file paths belong directly in active scripts, not in Makefile arguments.
+- Avoid path alias variables for simple I/O handoff when direct use is clear.
+- Prefer direct call-site reads/writes (`read_csv("../input/foo.csv")`, `write_csv_if_changed(df, "../output/bar.csv")`, and R equivalents).
+- Keep path handling explicit and local to each read/write call unless reuse materially improves clarity.
+- For CLI scripts, use arguments only for real specification/configuration values, not fixed file paths.
+- For CLI scripts, keep positional `args[i]` or `cli_args[i]` as the canonical Make interface for those specification/configuration values, then introduce one short top-of-script unpacking block to named variables when that makes interactive execution clearer.
+- Do not create `in_*`, `out_*`, or similar path variables solely to shuttle fixed task-local paths from the top of the script to the read/write call. Use direct paths at the call site unless the same path is reused enough that a local variable materially improves readability.
+- Do not use `normalizePath()` in active task scripts for standard Make-managed inputs/outputs; keep task paths relative and direct.
+- Do not use `dir.create()` in active task scripts for standard task `input/`, `output/`, or `temp/` directories; Make should own directory creation.
+
+## Linear Active Script Standard
+- For non-archived active tasks, prefer scripts that run top-to-bottom in a linear, readable sequence once the user is in the task `code/` folder.
+- Inline one-off cleaning, merge, transformation, modeling, and export steps instead of wrapping them in local helper functions.
+- Use functions in active scripts only when logic is clearly reused within that same script and duplication would materially hurt readability.
+- Do not leave the main active script as a thin wrapper around one large helper pipeline.
+- Put genuinely reusable cross-task helpers in `tasks/_lib`.
+- Allow a task-family helper file only when multiple active sibling scripts share substantial logic and moving it to `tasks/_lib` would be less clear.
+- When refactoring for readability, preserve current methods and outputs unless fixing a confirmed bug.
+
+## Root-Cause First (No Shortcuts)
+- Do not bypass missing dependencies with wildcard hacks, dummy targets, or optionalized prerequisite checks.
+- Do not use forwarding wrappers (for example, an R script that only calls `python3 some_script.py`).
+- Do not add placeholder smoke targets.
+- No silent fallback branches. If a secondary source is required, make source-priority logic explicit with row-level reason codes and deterministic unresolved/manual-review outputs.
+- Fix producer/root data issues upstream rather than suppressing validation downstream.
+
+## Environment Setup Conventions
+- Keep `tasks/setup_environment/code/` as the bootstrap entry point.
+- Keep package bootstrap scripts (R/Stata) current and log installed package versions.
+- Reuse `run.sbatch` where SLURM execution is needed; symlink it only in tasks that actually require it.
+
+## Terse/Clear Code Preference
+- Prefer simpler argument parsing and fewer helper abstractions when they do not improve clarity.
+- Keep scripts short, direct, and clearly mapped to Makefile arguments and outputs.
+- Avoid unnecessary indirection so readers can trace input -> transform -> output quickly.
+
+## Collaboration Preferences
+- Keep commit messages clear and minimal.
+- When changing a figure/table, edit the generating script and rerun the relevant task.
+- Prefer incremental, testable changes over large rewrites.
