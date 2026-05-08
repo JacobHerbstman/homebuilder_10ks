@@ -30,6 +30,6 @@ make
 
 The SEC fetch task Makefiles symlink the repo-root `.env` into their task-local `input/` folders and source that symlink before calling Python. If `.env` is missing, Make stops with a setup error telling the runner to copy `.env.example` and set `SEC_USER_AGENT`.
 
-`SEC_REQUESTS_PER_SECOND=4` keeps requests well below the SEC maximum. `SEC_PULL_DATE` fixes the raw-data cache folder date so a replication run writes to a deterministic raw directory. Set `SEC_FORCE=1` in `.env` only if you intentionally want to refresh already-cached SEC files.
+`SEC_REQUESTS_PER_SECOND=4` keeps requests well below the SEC maximum. `SEC_PULL_DATE` fixes the SEC fetch task cache subfolder date so a replication run writes deterministic files under the relevant task's `output/raw/` folder. The Builder Magazine scrape window and pull date are fixed in `tasks/fetch_builder_magazine_lists/code/Makefile`. Set `SEC_FORCE=1` in `.env` only if you intentionally want to refresh already-cached SEC source files.
 
 The local `.env` file is ignored by git. Do not commit personal contact information or hard-code a user agent in the Python fetch scripts.

@@ -9,15 +9,15 @@ from sec_fetch_utils import fetch_to_path, pull_date, require_sec_user_agent, sh
 
 def main():
     user_agent = require_sec_user_agent()
-    raw_path = Path("..") / ".." / ".." / "data_raw" / "sec_company_tickers" / pull_date() / "company_tickers.json"
+    source_local_path = Path("..") / ".." / "fetch_sec_company_tickers" / "output" / "raw" / "sec_company_tickers" / pull_date() / "company_tickers.json"
     source_url = "https://www.sec.gov/files/company_tickers.json"
-    result = fetch_to_path(source_url, raw_path, user_agent)
+    result = fetch_to_path(source_url, source_local_path, user_agent)
 
     file_rows = [{
         "source_id": "sec_company_tickers",
         "pull_date": pull_date(),
         "source_url": source_url,
-        "raw_path": str(raw_path),
+        "source_local_path": str(source_local_path),
         "status": result["status"],
         "http_status": result["http_status"],
         "downloaded_at_utc": result["downloaded_at_utc"],
@@ -28,8 +28,8 @@ def main():
     checksum_rows = [{
         "source_id": "sec_company_tickers",
         "pull_date": pull_date(),
-        "raw_path": str(raw_path),
-        "checksum_sha256": sha256(raw_path),
+        "source_local_path": str(source_local_path),
+        "checksum_sha256": sha256(source_local_path),
     }]
 
     qc_rows = [{
@@ -42,12 +42,12 @@ def main():
     write_csv(
         Path("..") / "output" / "sec_company_tickers_files.csv",
         file_rows,
-        ["source_id", "pull_date", "source_url", "raw_path", "status", "http_status", "downloaded_at_utc", "bytes", "error"],
+        ["source_id", "pull_date", "source_url", "source_local_path", "status", "http_status", "downloaded_at_utc", "bytes", "error"],
     )
     write_csv(
         Path("..") / "output" / "sec_company_tickers_checksums.csv",
         checksum_rows,
-        ["source_id", "pull_date", "raw_path", "checksum_sha256"],
+        ["source_id", "pull_date", "source_local_path", "checksum_sha256"],
     )
     write_csv(
         Path("..") / "output" / "sec_company_tickers_qc.csv",

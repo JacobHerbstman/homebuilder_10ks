@@ -33,10 +33,10 @@ def main():
 
     for firm in crosswalk_rows:
         cik10 = firm["cik10"]
-        raw_dir = Path("..") / ".." / ".." / "data_raw" / "sec_submissions" / cik10
+        source_local_dir = Path("..") / ".." / "fetch_sec_submissions" / "output" / "raw" / "sec_submissions" / cik10
         main_name = f"CIK{cik10}.json"
         main_url = f"https://data.sec.gov/submissions/{main_name}"
-        main_path = raw_dir / main_name
+        main_path = source_local_dir / main_name
         result = fetch_to_path(main_url, main_path, user_agent)
         rows.append({
             "builder_name_key": firm["builder_name_key"],
@@ -46,7 +46,7 @@ def main():
             "sec_company_name": firm["sec_company_name"],
             "file_role": "main_submissions_json",
             "source_url": main_url,
-            "raw_path": str(main_path),
+            "source_local_path": str(main_path),
             "status": result["status"],
             "http_status": result["http_status"],
             "downloaded_at_utc": result["downloaded_at_utc"],
@@ -70,7 +70,7 @@ def main():
             if not name:
                 continue
             older_url = f"https://data.sec.gov/submissions/{name}"
-            older_path = raw_dir / name
+            older_path = source_local_dir / name
             older_result = fetch_to_path(older_url, older_path, user_agent)
             rows.append({
                 "builder_name_key": firm["builder_name_key"],
@@ -80,7 +80,7 @@ def main():
                 "sec_company_name": firm["sec_company_name"],
                 "file_role": "older_submissions_json",
                 "source_url": older_url,
-                "raw_path": str(older_path),
+                "source_local_path": str(older_path),
                 "status": older_result["status"],
                 "http_status": older_result["http_status"],
                 "downloaded_at_utc": older_result["downloaded_at_utc"],
@@ -100,7 +100,7 @@ def main():
             "sec_company_name": "",
             "file_role": "",
             "source_url": "",
-            "raw_path": "",
+            "source_local_path": "",
             "status": "no_failures",
             "http_status": "",
             "downloaded_at_utc": "",
@@ -115,7 +115,7 @@ def main():
         {"check": "submission_file_failures", "status": "ok" if len([r for r in failures if r["status"] != "no_failures"]) == 0 else "warn", "value": len([r for r in failures if r["status"] != "no_failures"]), "detail": ""},
     ]
 
-    fieldnames = ["builder_name_key", "builder_name_clean", "ticker", "cik10", "sec_company_name", "file_role", "source_url", "raw_path", "status", "http_status", "downloaded_at_utc", "bytes", "checksum_sha256", "error"]
+    fieldnames = ["builder_name_key", "builder_name_clean", "ticker", "cik10", "sec_company_name", "file_role", "source_url", "source_local_path", "status", "http_status", "downloaded_at_utc", "bytes", "checksum_sha256", "error"]
     write_csv(Path("..") / "output" / "sec_submissions_files.csv", rows, fieldnames)
     write_csv(Path("..") / "output" / "sec_submissions_failures.csv", failures, fieldnames)
     write_csv(Path("..") / "output" / "sec_submissions_qc.csv", qc_rows, ["check", "status", "value", "detail"])

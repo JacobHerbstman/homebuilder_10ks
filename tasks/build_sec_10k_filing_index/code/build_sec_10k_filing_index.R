@@ -58,11 +58,11 @@ parallel_df <- function(x) {
 }
 
 parse_submissions_file <- function(row) {
-  if (!file.exists(row$raw_path)) {
+  if (!file.exists(row$source_local_path)) {
     return(tibble())
   }
 
-  submission_json <- tryCatch(fromJSON(row$raw_path, simplifyVector = FALSE), error = function(e) NULL)
+  submission_json <- tryCatch(fromJSON(row$source_local_path, simplifyVector = FALSE), error = function(e) NULL)
   if (is.null(submission_json)) {
     return(tibble())
   }
@@ -86,7 +86,7 @@ parse_submissions_file <- function(row) {
       report_date = parse_sec_date(reportDate),
       primary_document = if ("primaryDocument" %in% names(filings)) as.character(primaryDocument) else NA_character_,
       primary_doc_description = if ("primaryDocDescription" %in% names(filings)) as.character(primaryDocDescription) else NA_character_,
-      source_submissions_path = row$raw_path
+      source_submissions_path = row$source_local_path
     )
 }
 
@@ -97,8 +97,8 @@ crosswalk <- read_csv("../input/builder_sec_crosswalk.csv", show_col_types = FAL
   select(builder_name_key, builder_name_clean, ticker, cik, cik10, sec_company_name, first_public_list_year, last_public_list_year)
 
 submission_files <- read_csv("../input/sec_submissions_files.csv", show_col_types = FALSE, na = c("", "NA")) |>
-  filter(status %in% c("downloaded", "already_present"), file.exists(raw_path)) |>
-  mutate(cik10 = as.character(cik10), raw_path = as.character(raw_path))
+  filter(status %in% c("downloaded", "already_present"), file.exists(source_local_path)) |>
+  mutate(cik10 = as.character(cik10), source_local_path = as.character(source_local_path))
 
 if (nrow(submission_files) == 0) {
   write_csv_if_changed(empty_index, "../output/sec_10k_filing_index.csv")

@@ -164,7 +164,7 @@ parse_builder_table_rows <- function(doc, file_row, closings_year, revenue_year,
       raw_prior_year_rank = raw_prior_year_rank,
       company_detail_url = company_detail_url,
       source_url = file_row$source_url,
-      source_path = file_row$raw_path,
+      source_path = file_row$source_local_path,
       parse_timestamp_utc = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
       parse_method = "html_table_rows"
     )
@@ -231,7 +231,7 @@ parse_builder_text_rows <- function(doc, file_row, listing_lines, closings_year,
       raw_prior_year_rank = raw_prior_year_rank,
       company_detail_url = find_detail_url(link_df, raw_company_name, file_row$source_url),
       source_url = file_row$source_url,
-      source_path = file_row$raw_path,
+      source_path = file_row$source_local_path,
       parse_timestamp_utc = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
       parse_method = "visible_text_listing_lines"
     )
@@ -242,7 +242,7 @@ parse_builder_text_rows <- function(doc, file_row, listing_lines, closings_year,
 }
 
 parse_builder_file <- function(file_row) {
-  if (!file.exists(file_row$raw_path)) {
+  if (!file.exists(file_row$source_local_path)) {
     return(list(
       rows = empty_raw_rows,
       qc = tibble(
@@ -251,7 +251,7 @@ parse_builder_file <- function(file_row) {
         list_year = as.integer(file_row$list_year),
         list_type = file_row$list_type,
         source_url = file_row$source_url,
-        source_path = file_row$raw_path,
+        source_path = file_row$source_local_path,
         fetch_status = file_row$status,
         parse_status = "missing_html",
         row_count = 0L,
@@ -266,7 +266,7 @@ parse_builder_file <- function(file_row) {
     ))
   }
 
-  doc <- read_html(file_row$raw_path)
+  doc <- read_html(file_row$source_local_path)
   text_lines <- read_listing_text_lines(doc)
   listing_lines <- section_lines(text_lines)
 
@@ -297,7 +297,7 @@ parse_builder_file <- function(file_row) {
       list_year = as.integer(file_row$list_year),
       list_type = file_row$list_type,
       source_url = file_row$source_url,
-      source_path = file_row$raw_path,
+      source_path = file_row$source_local_path,
       fetch_status = file_row$status,
       parse_status = parse_status,
       row_count = nrow(parsed_df),
@@ -315,7 +315,8 @@ parse_builder_file <- function(file_row) {
 file_inventory <- read_csv("../input/builder_magazine_html_files.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     list_year = suppressWarnings(as.integer(list_year)),
-    raw_path = as.character(raw_path),
+    pull_date = as.character(pull_date),
+    source_local_path = as.character(source_local_path),
     source_url = as.character(source_url)
   ) |>
   arrange(list_year, list_type)

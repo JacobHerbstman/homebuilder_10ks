@@ -7,12 +7,13 @@
 - Tasks that run many regression specifications, for example, should always call arguments from the makefile and use loops in the makefile to create target filenames for each specification.
   Then the R script should read in those arguments from the command line and produce the corresponding output file, named according to the arguments in the makefile.
 - Tasks that use output from ``upstream`` tasks should use symlinking and makefiles to connect them together.
-  It should be easy to trace the path out via makefiles from the `data_raw/` folder to final outputs.
+  It should be easy to trace the path out via makefiles from root raw inputs or fetch-task outputs to final outputs.
+  Dynamically downloaded files are task outputs and should live under that task's `output/` or `temp/` folder, never under `data_raw/`.
 
   ## Project Structure
 - `paper/` - LaTeX paper and sections
 - `slides/` - Presentation slides
-- `data_raw/` - Raw data files (not to be modified)
+- `data_raw/` - Manually supplied raw starting data only; dynamically fetched files belong in task-local `output/` or `temp/`
 - `tasks/` - Analysis tasks, each with `code/`, `input/`, and `output/` subfolders
 - R scripts in `tasks/*/code/` generate outputs (tables, figures) used by the paper
 

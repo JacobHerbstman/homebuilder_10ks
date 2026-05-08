@@ -28,11 +28,11 @@ def main():
         if not cik10 or not accession_no_dashes or not cik_no_leading_zeros or not primary_document:
             continue
 
-        raw_dir = Path("..") / ".." / ".." / "data_raw" / "sec_10k_filings" / cik10 / accession_no_dashes
+        source_local_dir = Path("..") / ".." / "fetch_sec_10k_filings" / "output" / "raw" / "sec_10k_filings" / cik10 / accession_no_dashes
         index_url = f"https://www.sec.gov/Archives/edgar/data/{cik_no_leading_zeros}/{accession_no_dashes}/index.json"
         filing_url = f"https://www.sec.gov/Archives/edgar/data/{cik_no_leading_zeros}/{accession_no_dashes}/{primary_document}"
-        index_path = raw_dir / "index.json"
-        document_path = raw_dir / primary_document
+        index_path = source_local_dir / "index.json"
+        document_path = source_local_dir / primary_document
 
         index_result = fetch_to_path(index_url, index_path, user_agent)
         time.sleep(delay_seconds)

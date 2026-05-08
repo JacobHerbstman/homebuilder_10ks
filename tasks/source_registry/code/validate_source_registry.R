@@ -9,7 +9,7 @@ source_catalog <- read_csv("source_catalog.csv", show_col_types = FALSE, na = c(
 manual_manifest <- read_csv("manual_manifest.csv", show_col_types = FALSE, na = c("", "NA"))
 
 required_source_cols <- c(
-  "source_id", "source_name", "access_mode", "official_url", "raw_subdir",
+  "source_id", "source_name", "access_mode", "official_url", "source_local_subdir",
   "expected_filename", "vintage", "unit", "geography_fields", "date_field",
   "start_date", "end_date", "checksum_sha256", "notes"
 )

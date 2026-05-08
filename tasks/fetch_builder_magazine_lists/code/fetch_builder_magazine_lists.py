@@ -125,40 +125,40 @@ def main():
             ("top_100", f"https://www.builderonline.com/builder-100/builder-100-list/{year}/"),
             ("next_100", f"https://www.builderonline.com/builder-100/builder-100-list/{year}?next=true"),
         ):
-            raw_path = Path("..") / ".." / ".." / "data_raw" / "builder_magazine_builder_100_lists" / pull_date / f"builder_100_{year}_{list_type}.html"
-            raw_path.parent.mkdir(parents=True, exist_ok=True)
+            source_local_path = Path("..") / ".." / "fetch_builder_magazine_lists" / "output" / "raw" / "builder_magazine_builder_100_lists" / pull_date / f"builder_100_{year}_{list_type}.html"
+            source_local_path.parent.mkdir(parents=True, exist_ok=True)
             downloaded_at_utc = utc_now()
             http_status = ""
             error = ""
 
-            if raw_path.exists() and not force:
+            if source_local_path.exists() and not force:
                 status = "already_present"
-                bytes_written = raw_path.stat().st_size
+                bytes_written = source_local_path.stat().st_size
             else:
                 http_status, body, error = fetch_url(url, user_agent)
                 body_text_start = body[:2000].decode("utf-8", errors="ignore").lower()
 
                 if http_status == 200 and "sorry, you have been blocked" not in body_text_start and "builder 100" in body_text_start:
-                    temp_path = raw_path.with_suffix(raw_path.suffix + ".tmp")
+                    temp_path = source_local_path.with_suffix(source_local_path.suffix + ".tmp")
                     temp_path.write_bytes(body)
-                    temp_path.replace(raw_path)
+                    temp_path.replace(source_local_path)
                     status = "downloaded"
-                    bytes_written = raw_path.stat().st_size
+                    bytes_written = source_local_path.stat().st_size
                 elif http_status == 404:
                     status = "not_available"
                     bytes_written = 0
-                    if raw_path.exists():
-                        raw_path.unlink()
+                    if source_local_path.exists():
+                        source_local_path.unlink()
                 elif http_status in {401, 403} or "sorry, you have been blocked" in body_text_start:
                     status = "blocked"
                     bytes_written = 0
-                    if raw_path.exists():
-                        raw_path.unlink()
+                    if source_local_path.exists():
+                        source_local_path.unlink()
                 else:
                     status = "download_failed"
                     bytes_written = 0
-                    if raw_path.exists():
-                        raw_path.unlink()
+                    if source_local_path.exists():
+                        source_local_path.unlink()
 
                 time.sleep(0.35)
 
@@ -168,7 +168,7 @@ def main():
                 "list_year": year,
                 "list_type": list_type,
                 "source_url": url,
-                "raw_path": str(raw_path),
+                "source_local_path": str(source_local_path),
                 "status": status,
                 "http_status": http_status,
                 "downloaded_at_utc": downloaded_at_utc,
@@ -181,8 +181,8 @@ def main():
                 "pull_date": pull_date,
                 "list_year": year,
                 "list_type": list_type,
-                "raw_path": str(raw_path),
-                "checksum_sha256": sha256(raw_path),
+                "source_local_path": str(source_local_path),
+                "checksum_sha256": sha256(source_local_path),
             })
             qc_counts[status] = qc_counts.get(status, 0) + 1
 
@@ -212,12 +212,12 @@ def main():
     write_csv(
         Path("..") / "output" / "builder_magazine_html_files.csv",
         rows,
-        ["source_id", "pull_date", "list_year", "list_type", "source_url", "raw_path", "status", "http_status", "downloaded_at_utc", "bytes", "error"],
+        ["source_id", "pull_date", "list_year", "list_type", "source_url", "source_local_path", "status", "http_status", "downloaded_at_utc", "bytes", "error"],
     )
     write_csv(
         Path("..") / "output" / "builder_magazine_html_checksums.csv",
         checksum_rows,
-        ["source_id", "pull_date", "list_year", "list_type", "raw_path", "checksum_sha256"],
+        ["source_id", "pull_date", "list_year", "list_type", "source_local_path", "checksum_sha256"],
     )
     write_csv(
         Path("..") / "output" / "builder_magazine_fetch_qc.csv",

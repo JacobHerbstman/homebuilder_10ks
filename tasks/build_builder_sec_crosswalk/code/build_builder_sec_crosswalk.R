@@ -18,7 +18,7 @@ format_cik10 <- function(x) {
 
 parse_sec_ticker_map <- function() {
   file_inventory <- read_csv("../input/sec_company_tickers_files.csv", show_col_types = FALSE, na = c("", "NA")) |>
-    filter(status %in% c("downloaded", "already_present"), file.exists(raw_path)) |>
+    filter(status %in% c("downloaded", "already_present"), file.exists(source_local_path)) |>
     arrange(desc(pull_date))
 
   if (nrow(file_inventory) == 0) {
@@ -31,7 +31,7 @@ parse_sec_ticker_map <- function() {
     ))
   }
 
-  raw_json <- fromJSON(file_inventory$raw_path[[1]], simplifyVector = FALSE)
+  raw_json <- fromJSON(file_inventory$source_local_path[[1]], simplifyVector = FALSE)
   bind_rows(lapply(raw_json, function(row) {
     tibble(
       sec_ticker = str_to_upper(as.character(if (is.null(row$ticker)) NA_character_ else row$ticker)),
