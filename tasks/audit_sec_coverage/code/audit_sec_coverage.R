@@ -156,10 +156,10 @@ sec_filings_no_land_hits <- download_inventory |>
   arrange(builder_name_clean, desc(fiscal_year), accession_number)
 
 benchmark_expected <- tibble(
-  benchmark_name = c("d_r_horton_2024", "lennar_2024", "nvr_2024"),
-  expected_ticker = c("DHI", "LEN", "NVR"),
-  expected_report_date = as.Date(c("2024-09-30", "2024-11-30", "2024-12-31")),
-  expected_accession_number = c("0000882184-24-000057", "0001628280-25-002404", "0000906163-25-000011")
+  benchmark_name = c("pulte_2011", "d_r_horton_2024", "lennar_2024", "nvr_2024"),
+  expected_ticker = c("PHM", "DHI", "LEN", "NVR"),
+  expected_report_date = as.Date(c("2011-12-31", "2024-09-30", "2024-11-30", "2024-12-31")),
+  expected_accession_number = c("0000822416-12-000010", "0000882184-24-000057", "0001628280-25-002404", "0000906163-25-000011")
 )
 
 indexed_benchmarks <- filing_index |>
@@ -238,6 +238,7 @@ sec_builder_coverage_audit <- tibble(
     "tenk_parser",
     "benchmarks",
     "benchmarks",
+    "benchmarks",
     "benchmarks"
   ),
   check = c(
@@ -255,6 +256,7 @@ sec_builder_coverage_audit <- tibble(
     "filings_with_parser_rows",
     "filings_with_land_term_hits",
     "candidate_rows",
+    "benchmark_pulte_2011_available",
     "benchmark_d_r_horton_2024_available",
     "benchmark_lennar_2024_available",
     "benchmark_nvr_2024_available"
@@ -274,6 +276,7 @@ sec_builder_coverage_audit <- tibble(
     if_else(nrow(mention_flags) > 0, "ok", "warn"),
     if_else(sum(mention_flags$land_term_hit_count > 0, na.rm = TRUE) > 0, "ok", "warn"),
     if_else(nrow(land_candidates) > 0, "ok", "warn"),
+    if_else(any(sec_benchmark_availability$benchmark_name == "pulte_2011" & sec_benchmark_availability$indexed_flag), "ok", "warn"),
     if_else(any(sec_benchmark_availability$benchmark_name == "d_r_horton_2024" & sec_benchmark_availability$indexed_flag), "ok", "warn"),
     if_else(any(sec_benchmark_availability$benchmark_name == "lennar_2024" & sec_benchmark_availability$indexed_flag), "ok", "warn"),
     if_else(any(sec_benchmark_availability$benchmark_name == "nvr_2024" & sec_benchmark_availability$indexed_flag), "ok", "warn")
@@ -293,6 +296,7 @@ sec_builder_coverage_audit <- tibble(
     nrow(mention_flags),
     sum(mention_flags$land_term_hit_count > 0, na.rm = TRUE),
     nrow(land_candidates),
+    as.integer(any(sec_benchmark_availability$benchmark_name == "pulte_2011" & sec_benchmark_availability$indexed_flag)),
     as.integer(any(sec_benchmark_availability$benchmark_name == "d_r_horton_2024" & sec_benchmark_availability$indexed_flag)),
     as.integer(any(sec_benchmark_availability$benchmark_name == "lennar_2024" & sec_benchmark_availability$indexed_flag)),
     as.integer(any(sec_benchmark_availability$benchmark_name == "nvr_2024" & sec_benchmark_availability$indexed_flag))
@@ -312,6 +316,7 @@ sec_builder_coverage_audit <- tibble(
     "Downloaded filings with parser mention rows.",
     "Parser rows with at least one tracked land term mention.",
     "Deterministic snippet-level candidate values.",
+    "Expected accession 0000822416-12-000010.",
     "Expected accession 0000882184-24-000057.",
     "Expected accession 0001628280-25-002404.",
     "Expected accession 0000906163-25-000011."

@@ -33,10 +33,10 @@ empty_index <- tibble(
 )
 
 benchmark_accessions <- tibble(
-  benchmark_name = c("d_r_horton_2024", "lennar_2024", "nvr_2024"),
-  expected_ticker = c("DHI", "LEN", "NVR"),
-  expected_report_date = as.Date(c("2024-09-30", "2024-11-30", "2024-12-31")),
-  expected_accession_number = c("0000882184-24-000057", "0001628280-25-002404", "0000906163-25-000011")
+  benchmark_name = c("pulte_2011", "d_r_horton_2024", "lennar_2024", "nvr_2024"),
+  expected_ticker = c("PHM", "DHI", "LEN", "NVR"),
+  expected_report_date = as.Date(c("2011-12-31", "2024-09-30", "2024-11-30", "2024-12-31")),
+  expected_accession_number = c("0000822416-12-000010", "0000882184-24-000057", "0001628280-25-002404", "0000906163-25-000011")
 )
 
 parse_sec_date <- function(x) {
@@ -169,6 +169,7 @@ qc_rows <- tibble(
     "indexed_10k_filings",
     "indexed_builder_era_10k_filings",
     "unique_sec_reporting_builders_with_10k",
+    "benchmark_pulte_2011_indexed",
     "benchmark_d_r_horton_2024_indexed",
     "benchmark_lennar_2024_indexed",
     "benchmark_nvr_2024_indexed"
@@ -178,6 +179,7 @@ qc_rows <- tibble(
     if_else(nrow(tenk_index) > 0, "ok", "fail"),
     if_else(sum(tenk_index$main_builder_era_flag, na.rm = TRUE) > 0, "ok", "warn"),
     if_else(n_distinct(tenk_index$cik10) > 0, "ok", "fail"),
+    if_else(any(benchmark_filings$benchmark_name == "pulte_2011" & benchmark_filings$indexed_flag), "ok", "warn"),
     if_else(any(benchmark_filings$benchmark_name == "d_r_horton_2024" & benchmark_filings$indexed_flag), "ok", "warn"),
     if_else(any(benchmark_filings$benchmark_name == "lennar_2024" & benchmark_filings$indexed_flag), "ok", "warn"),
     if_else(any(benchmark_filings$benchmark_name == "nvr_2024" & benchmark_filings$indexed_flag), "ok", "warn")
@@ -187,6 +189,7 @@ qc_rows <- tibble(
     nrow(tenk_index),
     sum(tenk_index$main_builder_era_flag, na.rm = TRUE),
     n_distinct(tenk_index$cik10),
+    as.integer(any(benchmark_filings$benchmark_name == "pulte_2011" & benchmark_filings$indexed_flag)),
     as.integer(any(benchmark_filings$benchmark_name == "d_r_horton_2024" & benchmark_filings$indexed_flag)),
     as.integer(any(benchmark_filings$benchmark_name == "lennar_2024" & benchmark_filings$indexed_flag)),
     as.integer(any(benchmark_filings$benchmark_name == "nvr_2024" & benchmark_filings$indexed_flag))
@@ -196,7 +199,7 @@ qc_rows <- tibble(
     "",
     "Fiscal year inferred from report date, falling back to filing date.",
     "",
-    rep("Benchmark accession availability check.", 3)
+    rep("Benchmark accession availability check.", 4)
   )
 )
 

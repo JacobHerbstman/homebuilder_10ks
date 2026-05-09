@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import csv
+import json
 import sys
 import time
 from pathlib import Path
@@ -12,6 +13,32 @@ from sec_fetch_utils import fetch_to_path, require_sec_user_agent, sec_request_d
 def read_filing_index():
     with Path("../input/sec_10k_filing_index.csv").open(newline="") as f:
         return list(csv.DictReader(f))
+
+
+def accession_text_document(index_path, accession_number):
+    if not Path(index_path).exists() or not accession_number:
+        return ""
+
+    try:
+        index_json = json.loads(Path(index_path).read_text())
+    except Exception:
+        return ""
+
+    items = index_json.get("directory", {}).get("item", [])
+    names = [item.get("name", "") for item in items]
+    accession_text_name = f"{accession_number}.txt"
+    if accession_text_name in names:
+        return accession_text_name
+
+    text_names = [name for name in names if name.lower().endswith(".txt")]
+    accession_prefix_matches = [
+        name for name in text_names
+        if name.startswith(accession_number) or name.startswith(accession_number.replace("-", ""))
+    ]
+    if accession_prefix_matches:
+        return accession_prefix_matches[0]
+
+    return ""
 
 
 def main():
@@ -39,6 +66,21 @@ def main():
         document_result = fetch_to_path(filing_url, document_path, user_agent)
         time.sleep(delay_seconds)
 
+        requested_primary_document = primary_document
+        fallback_primary_document = ""
+        if document_result["status"] not in {"downloaded", "already_present"}:
+            fallback_primary_document = accession_text_document(index_path, filing.get("accession_number", ""))
+            if fallback_primary_document and fallback_primary_document != primary_document:
+                fallback_url = f"https://www.sec.gov/Archives/edgar/data/{cik_no_leading_zeros}/{accession_no_dashes}/{fallback_primary_document}"
+                fallback_path = source_local_dir / fallback_primary_document
+                fallback_result = fetch_to_path(fallback_url, fallback_path, user_agent)
+                time.sleep(delay_seconds)
+                if fallback_result["status"] in {"downloaded", "already_present"}:
+                    primary_document = fallback_primary_document
+                    filing_url = fallback_url
+                    document_path = fallback_path
+                    document_result = fallback_result
+
         rows.append({
             "builder_name_key": filing.get("builder_name_key", ""),
             "builder_name_clean": filing.get("builder_name_clean", ""),
@@ -52,7 +94,9 @@ def main():
             "filing_date": filing.get("filing_date", ""),
             "report_date": filing.get("report_date", ""),
             "fiscal_year": filing.get("fiscal_year", ""),
+            "requested_primary_document": requested_primary_document,
             "primary_document": primary_document,
+            "fallback_primary_document": fallback_primary_document,
             "filing_url": filing_url,
             "directory_index_url": index_url,
             "directory_index_local_path": str(index_path),
@@ -89,7 +133,9 @@ def main():
             "filing_date": "",
             "report_date": "",
             "fiscal_year": "",
+            "requested_primary_document": "",
             "primary_document": "",
+            "fallback_primary_document": "",
             "filing_url": "",
             "directory_index_url": "",
             "directory_index_local_path": "",
@@ -116,7 +162,8 @@ def main():
     fieldnames = [
         "builder_name_key", "builder_name_clean", "ticker", "cik", "cik10", "sec_company_name",
         "accession_number", "accession_number_no_dashes", "form", "filing_date", "report_date",
-        "fiscal_year", "primary_document", "filing_url", "directory_index_url",
+        "fiscal_year", "requested_primary_document", "primary_document",
+        "fallback_primary_document", "filing_url", "directory_index_url",
         "directory_index_local_path", "primary_document_local_path", "directory_index_status",
         "primary_document_status", "directory_index_http_status", "primary_document_http_status",
         "download_timestamp_utc", "directory_index_bytes", "primary_document_bytes",
