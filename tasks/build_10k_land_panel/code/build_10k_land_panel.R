@@ -29,11 +29,12 @@ preferred_metric_names <- c(
   "lot_purchase_agreements", "optioned_lots_approved_for_purchase",
   "optioned_lots_pending_approval", "homes_in_inventory",
   "remaining_purchase_price", "deposits_preacquisition_costs",
-  "deposits_and_preacquisition_costs", "refundable_deposits",
+  "refundable_deposits",
   "nonrefundable_deposits_preacquisition_costs",
   "earnest_money_deposits", "option_deposits", "land_not_owned_under_option_agreements",
-  "land_purchase_contract_obligations", "lpa_cash_deposits",
-  "closings", "closings_deliveries", "net_new_orders_units",
+  "land_purchase_contract_obligations", "option_deposit_collateral_total",
+  "lpa_cash_deposits",
+  "closings", "net_new_orders_units",
   "net_new_orders_dollars", "cancellation_rate", "active_communities",
   "backlog_units", "backlog_dollars", "average_selling_price",
   "home_sale_revenue", "land_sale_revenue", "land_sale_cost",
@@ -41,10 +42,23 @@ preferred_metric_names <- c(
   "land_under_development", "land_held_for_future_development",
   "land_held_for_sale", "land_held_for_sale_gross",
   "land_held_for_sale_nrv_reserve", "total_inventory", "total_assets",
-  "land_related_charges_total", "land_community_valuation_adjustments",
+  "land_inventory_impairments", "land_related_charges_total", "land_community_valuation_adjustments",
   "nrv_adjustments_land_held_for_sale", "writeoff_deposits_preacquisition_costs",
-  "deposit_write_offs", "jv_impairments", "letters_of_credit",
+  "jv_impairments", "letters_of_credit",
   "surety_bonds", "guarantees"
+)
+
+nonnegative_magnitude_metric_names <- c(
+  "land_inventory_impairments", "land_related_charges_total",
+  "land_community_valuation_adjustments", "nrv_adjustments_land_held_for_sale",
+  "writeoff_deposits_preacquisition_costs", "jv_impairments",
+  "land_sale_cost", "letters_of_credit", "surety_bonds", "guarantees"
+)
+
+core_physical_snippet_metric_names <- c(
+  "owned_lots", "optioned_lots", "controlled_lots", "total_lots",
+  "owned_homesites", "controlled_homesites", "total_homesites",
+  "lot_purchase_agreements"
 )
 
 candidates <- read_csv("../input/tenk_land_candidates.csv", show_col_types = FALSE, na = c("", "NA")) |>
@@ -61,8 +75,12 @@ candidates <- read_csv("../input/tenk_land_candidates.csv", show_col_types = FAL
     table_scale_label = coalesce(table_scale_label, ""),
     extraction_method = coalesce(extraction_method, ""),
     confidence = coalesce(confidence, ""),
-    variable_name = if_else(variable_name == "deposits_and_preacquisition_costs", "deposits_preacquisition_costs", variable_name),
-    variable_name = if_else(variable_name == "closings_deliveries", "closings", variable_name),
+    variable_name = case_when(
+      variable_name == "deposits_and_preacquisition_costs" ~ "deposits_preacquisition_costs",
+      variable_name == "deposit_write_offs" ~ "writeoff_deposits_preacquisition_costs",
+      TRUE ~ variable_name
+    ),
+    numeric_value = if_else(variable_name %in% nonnegative_magnitude_metric_names, abs(numeric_value), numeric_value),
     physical_unit_type = case_when(
       str_detect(variable_name, "homesite") ~ "homesite",
       str_detect(variable_name, "lot|lpa") ~ "lot",
@@ -78,7 +96,8 @@ candidates <- read_csv("../input/tenk_land_candidates.csv", show_col_types = FAL
                            "optioned_lots_pending_approval", "remaining_purchase_price",
                            "deposits_preacquisition_costs", "refundable_deposits",
                            "nonrefundable_deposits_preacquisition_costs",
-                           "land_not_owned_under_option_agreements") ~ "option",
+                           "land_not_owned_under_option_agreements",
+                           "option_deposit_collateral_total") ~ "option",
       variable_name %in% c("lot_purchase_agreements", "lpa_cash_deposits") ~ "lpa",
       variable_name == "land_purchase_contract_obligations" ~ "land_bank_or_purchase_contract",
       variable_name %in% c("controlled_lots", "controlled_homesites", "total_lots", "total_homesites") ~ "mixed_controlled",
@@ -104,7 +123,31 @@ candidates <- read_csv("../input/tenk_land_candidates.csv", show_col_types = FAL
       TRUE ~ ""
     )
   ) |>
-  filter(!is.na(accession_number), !is.na(numeric_value), variable_name %in% preferred_metric_names)
+  filter(
+    !is.na(accession_number),
+    !is.na(numeric_value),
+    variable_name %in% preferred_metric_names,
+    !(unit == "dollars" &
+        extraction_method == "keyword_snippet_nearby_numeric" &
+        !str_detect(str_to_lower(coalesce(raw_value, "")), "\\$|million|billion|thousand")),
+    !(unit == "dollars" &
+        variable_name != "average_selling_price" &
+        numeric_value > 0 & numeric_value < 100000),
+    !(variable_name %in% core_physical_snippet_metric_names &
+        extraction_method == "keyword_snippet_nearby_numeric" &
+        numeric_value < 100),
+    !(variable_name == "homes_under_construction_inventory" &
+        extraction_method == "keyword_snippet_nearby_numeric" &
+        str_detect(str_to_lower(coalesce(context_snippet, "")), "property and equipment|computer software|leasehold improvements|furniture and fixtures|machinery and equipment")),
+    !(variable_name == "land_held_for_sale" &
+        extraction_method == "keyword_snippet_nearby_numeric" &
+        str_detect(str_to_lower(coalesce(context_snippet, "")), "other assets consist primarily") &
+        str_detect(str_to_lower(coalesce(context_snippet, "")), "prepaid insurance")),
+    !(variable_name == "land_under_development" &
+        extraction_method == "keyword_snippet_nearby_numeric" &
+        str_detect(str_to_lower(coalesce(context_snippet, "")), "number of lots owned") &
+        str_detect(str_to_lower(coalesce(context_snippet, "")), "west region|central region|east region"))
+  )
 
 download_inventory <- read_csv("../input/sec_10k_download_inventory.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
@@ -140,6 +183,8 @@ builder_firm_years <- read_csv("../input/builder_public_firm_year_identifiers.cs
 
 scored_candidates <- candidates |>
   mutate(
+    source_row_lower = str_squish(str_to_lower(coalesce(source_row_label, ""))),
+    source_column_lower = str_squish(str_to_lower(coalesce(source_column_label, ""))),
     period_rank = case_when(
       !is.na(period_year) & !is.na(fiscal_year) & period_year == fiscal_year ~ 60,
       is.na(period_year) ~ 20,
@@ -162,13 +207,48 @@ scored_candidates <- candidates |>
       confidence == "medium" ~ 10,
       TRUE ~ 0
     ),
-    total_rank = if_else(str_to_lower(coalesce(source_row_label, "")) == "total", 20, 0),
-    selection_score = candidate_score + period_rank + scope_rank + method_rank + confidence_rank + total_rank
+    total_rank = if_else(source_row_lower == "total", 20, 0),
+    controlled_total_rank = case_when(
+      variable_name %in% c("controlled_lots", "controlled_homesites") &
+        str_detect(source_column_lower, "\\btotal\\b") &
+        !str_detect(source_column_lower, "owned") ~ 35,
+      variable_name %in% c("controlled_lots", "controlled_homesites") &
+        str_detect(source_column_lower, "optioned|jv|joint venture") ~ -15,
+      TRUE ~ 0
+    ),
+    owned_total_rank = case_when(
+      variable_name == "owned_lots" &
+        str_detect(source_column_lower, "total lots owned|total owned lots|owned lots.*total|total lots") ~ 45,
+      variable_name == "owned_homesites" &
+        str_detect(source_column_lower, "total homesites owned|total owned homesites|owned homesites.*total|total homesites") ~ 45,
+      variable_name %in% c("owned_lots", "owned_homesites") &
+        source_row_lower == "total" &
+        str_detect(source_column_lower, "owned") ~ 25,
+      variable_name %in% c("owned_lots", "owned_homesites") &
+        str_detect(source_column_lower, "raw|finished|partially developed|under development|undeveloped|long term strategic|long- term strategic|other assets|model homes") ~ -35,
+      TRUE ~ 0
+    ),
+    overall_total_rank = case_when(
+      variable_name == "total_lots" &
+        str_detect(source_column_lower, "total lots|total homebuilding lots|owned and controlled") ~ 25,
+      variable_name == "total_homesites" &
+        str_detect(source_column_lower, "total homesites|owned and controlled") ~ 25,
+      TRUE ~ 0
+    ),
+    selection_score = candidate_score + period_rank + scope_rank + method_rank +
+      confidence_rank + total_rank + controlled_total_rank + owned_total_rank +
+      overall_total_rank
   ) |>
   group_by(cik10, accession_number, fiscal_year, variable_name) |>
   mutate(
     selection_score = selection_score + if_else(
       variable_name == "remaining_purchase_price" &
+        numeric_value == max(numeric_value, na.rm = TRUE),
+      25,
+      0
+    ),
+    selection_score = selection_score + if_else(
+      variable_name == "lpa_cash_deposits" &
         numeric_value == max(numeric_value, na.rm = TRUE),
       25,
       0
@@ -180,6 +260,7 @@ firm_year_candidates <- scored_candidates |>
   filter(source_scope %in% c("firm_year", "filing_snippet", "contract_structure", "")) |>
   arrange(
     cik10, accession_number, variable_name, desc(selection_score),
+    desc(if_else(variable_name == "lpa_cash_deposits", numeric_value, NA_real_)),
     desc(extraction_method == "table_cell_structured"),
     desc(confidence == "high")
   ) |>
@@ -204,6 +285,24 @@ preferred_values <- firm_year_candidates |>
     metric_uses_metric_specific_scale, included_in_reported_total_controlled,
     manual_review_reason,
     source_path, source_url, notes
+  )
+
+invalid_total_lot_keys <- preferred_values |>
+  filter(variable_name %in% c("owned_lots", "controlled_lots", "total_lots")) |>
+  select(cik10, accession_number, fiscal_year, variable_name, preferred_value) |>
+  distinct(cik10, accession_number, fiscal_year, variable_name, .keep_all = TRUE) |>
+  pivot_wider(names_from = variable_name, values_from = preferred_value) |>
+  filter(
+    !is.na(total_lots),
+    (!is.na(owned_lots) & total_lots < owned_lots) |
+      (!is.na(controlled_lots) & total_lots < controlled_lots)
+  ) |>
+  transmute(cik10, accession_number, fiscal_year, variable_name = "total_lots")
+
+preferred_values <- preferred_values |>
+  anti_join(
+    invalid_total_lot_keys,
+    by = c("cik10", "accession_number", "fiscal_year", "variable_name")
   )
 
 conflict_flags <- firm_year_candidates |>
@@ -282,10 +381,14 @@ panel_base <- download_inventory |>
 public_builder_10k_land_panel <- panel_base |>
   left_join(preferred_wide, by = c("cik10", "accession_number", "fiscal_year"), relationship = "one-to-one") |>
   mutate(
-    optioned_share = if_else(!is.na(optioned_lots) & !is.na(controlled_lots) & controlled_lots != 0, optioned_lots / controlled_lots, NA_real_),
+    optioned_share = case_when(
+      !is.na(optioned_lots) & !is.na(total_lots) & total_lots >= optioned_lots & total_lots != 0 ~ optioned_lots / total_lots,
+      !is.na(optioned_lots) & !is.na(controlled_lots) & controlled_lots >= optioned_lots & controlled_lots != 0 ~ optioned_lots / controlled_lots,
+      TRUE ~ NA_real_
+    ),
     controlled_share = case_when(
-      !is.na(controlled_lots) & !is.na(total_lots) & total_lots != 0 ~ controlled_lots / total_lots,
-      !is.na(controlled_homesites) & !is.na(total_homesites) & total_homesites != 0 ~ controlled_homesites / total_homesites,
+      !is.na(controlled_lots) & !is.na(total_lots) & total_lots >= controlled_lots & total_lots != 0 ~ controlled_lots / total_lots,
+      !is.na(controlled_homesites) & !is.na(total_homesites) & total_homesites >= controlled_homesites & total_homesites != 0 ~ controlled_homesites / total_homesites,
       TRUE ~ NA_real_
     ),
     controlled_lots_per_closing = if_else(!is.na(controlled_lots) & !is.na(closings) & closings != 0, controlled_lots / closings, NA_real_),
