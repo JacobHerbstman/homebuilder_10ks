@@ -10,14 +10,6 @@ suppressPackageStartupMessages({
 
 source("../../_lib/homebuilder_pipeline_utils.R")
 
-as_task_bool <- function(x) {
-  x %in% c(TRUE, "TRUE", "true", "True", "1", 1)
-}
-
-as_task_num <- function(x) {
-  suppressWarnings(as.numeric(as.character(x)))
-}
-
 collapse_reasons <- function(...) {
   reason_matrix <- cbind(...)
   apply(reason_matrix, 1, function(x) {
@@ -55,8 +47,8 @@ panel <- read_csv("../input/public_builder_10k_land_panel.csv", show_col_types =
     filing_date = suppressWarnings(as.Date(filing_date)),
     report_date = suppressWarnings(as.Date(report_date)),
     form = coalesce(form, ""),
-    standalone_sec_panel_eligible = as_task_bool(standalone_sec_panel_eligible),
-    extraction_manual_review_flag = as_task_bool(extraction_manual_review_flag)
+    standalone_sec_panel_eligible = standalone_sec_panel_eligible %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    extraction_manual_review_flag = extraction_manual_review_flag %in% c(TRUE, "TRUE", "true", "True", "1", 1)
   )
 
 preferred_values <- read_csv("../input/tenk_land_preferred_values.csv", show_col_types = FALSE, na = c("", "NA")) |>
@@ -64,7 +56,7 @@ preferred_values <- read_csv("../input/tenk_land_preferred_values.csv", show_col
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
     fiscal_year = suppressWarnings(as.integer(fiscal_year)),
-    preferred_value = as_task_num(preferred_value),
+    preferred_value = suppressWarnings(as.numeric(as.character(preferred_value))),
     confidence = coalesce(confidence, ""),
     extraction_method = coalesce(extraction_method, ""),
     source_scope = coalesce(source_scope, ""),
@@ -85,8 +77,8 @@ selection_audit <- read_csv("../input/tenk_land_value_selection_audit.csv", show
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
     fiscal_year = suppressWarnings(as.integer(fiscal_year)),
-    selected_as_preferred = as_task_bool(selected_as_preferred),
-    conflicting_high_score_values = as_task_bool(conflicting_high_score_values)
+    selected_as_preferred = selected_as_preferred %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    conflicting_high_score_values = conflicting_high_score_values %in% c(TRUE, "TRUE", "true", "True", "1", 1)
   )
 
 if (panel |>

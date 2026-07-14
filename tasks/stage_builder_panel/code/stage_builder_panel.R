@@ -20,34 +20,6 @@ clean_builder_name <- function(x, list_year = NULL) {
   str_squish(out)
 }
 
-parse_builder_number <- function(x) {
-  suppressWarnings(parse_number(as.character(x), na = c("", "NA", "N/A", "*")))
-}
-
-first_or_na <- function(x) {
-  x <- x[!is.na(x) & x != ""]
-  if (length(x) == 0) {
-    return(NA_character_)
-  }
-  x[[1]]
-}
-
-safe_min_int <- function(x) {
-  x <- x[!is.na(x)]
-  if (length(x) == 0) {
-    return(NA_integer_)
-  }
-  as.integer(min(x))
-}
-
-safe_max_int <- function(x) {
-  x <- x[!is.na(x)]
-  if (length(x) == 0) {
-    return(NA_integer_)
-  }
-  as.integer(max(x))
-}
-
 empty_panel <- tibble(
   list_year = integer(),
   underlying_closings_year = integer(),
@@ -117,10 +89,10 @@ builder_panel <- raw_rows |>
     builder_name_clean = clean_builder_name(raw_company_name, list_year),
     builder_name_key = normalize_text_key(clean_builder_name(raw_company_name, list_year)),
     builder_public_flag = public_marker_flag %in% TRUE,
-    total_closings = parse_builder_number(raw_total_closings),
-    gross_revenue_homebuilding_millions = parse_builder_number(raw_gross_revenue),
+    total_closings = suppressWarnings(parse_number(as.character(raw_total_closings), na = c("", "NA", "N/A", "*"))),
+    gross_revenue_homebuilding_millions = suppressWarnings(parse_number(as.character(raw_gross_revenue), na = c("", "NA", "N/A", "*"))),
     gross_revenue_units = as.character(gross_revenue_units),
-    prior_year_rank = parse_builder_number(raw_prior_year_rank),
+    prior_year_rank = suppressWarnings(parse_number(as.character(raw_prior_year_rank), na = c("", "NA", "N/A", "*"))),
     revenue_declined_flag = str_detect(coalesce(as.character(raw_gross_revenue), ""), "\\*"),
     revenue_estimated_flag = str_detect(coalesce(as.character(raw_gross_revenue), ""), "‡"),
     revenue_homebuilding_only_flag = str_detect(coalesce(as.character(raw_gross_revenue), ""), "†"),
@@ -149,19 +121,19 @@ builder_firm_roster <- builder_panel |>
   filter(!is.na(builder_name_key)) |>
   group_by(builder_name_key) |>
   summarise(
-    builder_name_clean = first_or_na(builder_name_clean),
+    builder_name_clean = first(builder_name_clean[!is.na(builder_name_clean) & builder_name_clean != ""], default = NA_character_),
     builder_names_observed = paste(sort(unique(builder_name_clean[!is.na(builder_name_clean) & builder_name_clean != ""])), collapse = " | "),
-    first_list_year = safe_min_int(list_year),
-    last_list_year = safe_max_int(list_year),
+    first_list_year = if (all(is.na(list_year))) NA_integer_ else as.integer(min(list_year, na.rm = TRUE)),
+    last_list_year = if (all(is.na(list_year))) NA_integer_ else as.integer(max(list_year, na.rm = TRUE)),
     years_observed = n_distinct(list_year),
     builder_year_rows = n(),
     top_100_years = n_distinct(list_year[list_type == "top_100"]),
     next_100_years = n_distinct(list_year[list_type == "next_100"]),
     ever_marked_public = any(builder_public_flag, na.rm = TRUE),
     public_years = n_distinct(list_year[builder_public_flag %in% TRUE]),
-    first_public_list_year = safe_min_int(list_year[builder_public_flag %in% TRUE]),
-    last_public_list_year = safe_max_int(list_year[builder_public_flag %in% TRUE]),
-    best_rank = safe_min_int(rank),
+    first_public_list_year = if (all(is.na(list_year[builder_public_flag %in% TRUE]))) NA_integer_ else as.integer(min(list_year[builder_public_flag %in% TRUE], na.rm = TRUE)),
+    last_public_list_year = if (all(is.na(list_year[builder_public_flag %in% TRUE]))) NA_integer_ else as.integer(max(list_year[builder_public_flag %in% TRUE], na.rm = TRUE)),
+    best_rank = if (all(is.na(rank))) NA_integer_ else as.integer(min(rank, na.rm = TRUE)),
     .groups = "drop"
   ) |>
   left_join(latest_rows, by = "builder_name_key", relationship = "one-to-one") |>

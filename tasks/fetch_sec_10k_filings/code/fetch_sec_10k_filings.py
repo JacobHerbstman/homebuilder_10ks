@@ -62,9 +62,11 @@ def main():
         document_path = source_local_dir / primary_document
 
         index_result = fetch_to_path(index_url, index_path, user_agent)
-        time.sleep(delay_seconds)
+        if index_result["status"] != "already_present":
+            time.sleep(delay_seconds)
         document_result = fetch_to_path(filing_url, document_path, user_agent)
-        time.sleep(delay_seconds)
+        if document_result["status"] != "already_present":
+            time.sleep(delay_seconds)
 
         requested_primary_document = primary_document
         fallback_primary_document = ""
@@ -74,7 +76,8 @@ def main():
                 fallback_url = f"https://www.sec.gov/Archives/edgar/data/{cik_no_leading_zeros}/{accession_no_dashes}/{fallback_primary_document}"
                 fallback_path = source_local_dir / fallback_primary_document
                 fallback_result = fetch_to_path(fallback_url, fallback_path, user_agent)
-                time.sleep(delay_seconds)
+                if fallback_result["status"] != "already_present":
+                    time.sleep(delay_seconds)
                 if fallback_result["status"] in {"downloaded", "already_present"}:
                     primary_document = fallback_primary_document
                     filing_url = fallback_url

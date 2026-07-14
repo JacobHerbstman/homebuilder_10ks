@@ -3,7 +3,6 @@
 suppressPackageStartupMessages({
   library(dplyr)
   library(jsonlite)
-  library(purrr)
   library(readr)
   library(stringr)
   library(tibble)
@@ -39,57 +38,6 @@ benchmark_accessions <- tibble(
   expected_accession_number = c("0000822416-12-000010", "0000882184-24-000057", "0001628280-25-002404", "0000906163-25-000011")
 )
 
-parse_sec_date <- function(x) {
-  out <- suppressWarnings(as.Date(as.character(x)))
-  out
-}
-
-parallel_df <- function(x) {
-  if (is.null(x) || length(x) == 0) {
-    return(tibble())
-  }
-
-  max_len <- max(vapply(x, length, integer(1)))
-  as_tibble(lapply(x, function(v) {
-    v <- as.character(v)
-    length(v) <- max_len
-    v
-  }))
-}
-
-parse_submissions_file <- function(row) {
-  if (!file.exists(row$source_local_path)) {
-    return(tibble())
-  }
-
-  submission_json <- tryCatch(fromJSON(row$source_local_path, simplifyVector = FALSE), error = function(e) NULL)
-  if (is.null(submission_json)) {
-    return(tibble())
-  }
-
-  filings <- if (!is.null(submission_json$filings$recent)) {
-    parallel_df(submission_json$filings$recent)
-  } else {
-    parallel_df(submission_json)
-  }
-
-  if (nrow(filings) == 0 || !"accessionNumber" %in% names(filings)) {
-    return(tibble())
-  }
-
-  filings |>
-    transmute(
-      cik10 = row$cik10,
-      accession_number = as.character(accessionNumber),
-      form = as.character(form),
-      filing_date = parse_sec_date(filingDate),
-      report_date = parse_sec_date(reportDate),
-      primary_document = if ("primaryDocument" %in% names(filings)) as.character(primaryDocument) else NA_character_,
-      primary_doc_description = if ("primaryDocDescription" %in% names(filings)) as.character(primaryDocDescription) else NA_character_,
-      source_submissions_path = row$source_local_path
-    )
-}
-
 crosswalk <- read_csv("../input/builder_sec_crosswalk.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(cik10 = as.character(cik10)) |>
   filter(sec_reporting_indicator %in% TRUE, !is.na(cik10), public_parent_no_comparable_us_10k %in% FALSE) |>
@@ -99,6 +47,18 @@ crosswalk <- read_csv("../input/builder_sec_crosswalk.csv", show_col_types = FAL
 submission_files <- read_csv("../input/sec_submissions_files.csv", show_col_types = FALSE, na = c("", "NA")) |>
   filter(status %in% c("downloaded", "already_present"), file.exists(source_local_path)) |>
   mutate(cik10 = as.character(cik10), source_local_path = as.character(source_local_path))
+
+manual_filing_seeds <- read_csv("manual_sec_10k_filing_seeds.csv", show_col_types = FALSE, na = c("", "NA")) |>
+  mutate(
+    cik10 = as.character(cik10),
+    filing_date = suppressWarnings(as.Date(as.character(filing_date))),
+    report_date = suppressWarnings(as.Date(as.character(report_date))),
+    source_submissions_path = "manual_sec_10k_filing_seeds.csv"
+  ) |>
+  select(
+    cik10, accession_number, form, filing_date, report_date,
+    primary_document, primary_doc_description, source_submissions_path
+  )
 
 if (nrow(submission_files) == 0) {
   write_csv_if_changed(empty_index, "../output/sec_10k_filing_index.csv")
@@ -118,10 +78,80 @@ if (nrow(submission_files) == 0) {
   quit(save = "no")
 }
 
-filings <- map_dfr(seq_len(nrow(submission_files)), function(i) parse_submissions_file(submission_files[i, ]))
+filings_from_submissions <- tibble()
+
+for (i in seq_len(nrow(submission_files))) {
+  submission_json <- tryCatch(
+    fromJSON(submission_files$source_local_path[i], simplifyVector = FALSE),
+    error = function(e) NULL
+  )
+  if (is.null(submission_json)) {
+    next
+  }
+
+  submission_lists <- if (!is.null(submission_json$filings$recent)) {
+    submission_json$filings$recent
+  } else {
+    submission_json
+  }
+  if (is.null(submission_lists) || length(submission_lists) == 0) {
+    next
+  }
+
+  max_len <- max(vapply(submission_lists, length, integer(1)))
+  filings_i <- as_tibble(lapply(submission_lists, function(v) {
+    v <- as.character(v)
+    length(v) <- max_len
+    v
+  }))
+  if (nrow(filings_i) == 0 || !"accessionNumber" %in% names(filings_i)) {
+    next
+  }
+
+  filings_from_submissions <- bind_rows(
+    filings_from_submissions,
+    filings_i |>
+      transmute(
+        cik10 = submission_files$cik10[i],
+        accession_number = as.character(accessionNumber),
+        form = as.character(form),
+        filing_date = suppressWarnings(as.Date(as.character(filingDate))),
+        report_date = suppressWarnings(as.Date(as.character(reportDate))),
+        primary_document = if ("primaryDocument" %in% names(filings_i)) as.character(primaryDocument) else NA_character_,
+        primary_doc_description = if ("primaryDocDescription" %in% names(filings_i)) as.character(primaryDocDescription) else NA_character_,
+        source_submissions_path = submission_files$source_local_path[i]
+      )
+  )
+}
+
+filings_raw <- bind_rows(
+  filings_from_submissions,
+  manual_filing_seeds
+)
+
+duplicate_submission_groups <- filings_raw |>
+  filter(form %in% c("10-K", "10-K/A", "10-KT")) |>
+  count(cik10, accession_number) |>
+  filter(n > 1)
+
+filings <- filings_raw |>
+  filter(form %in% c("10-K", "10-K/A", "10-KT")) |>
+  arrange(cik10, accession_number, desc(form == "10-K"), desc(filing_date), desc(report_date), primary_document, source_submissions_path) |>
+  group_by(cik10, accession_number) |>
+  summarise(
+    form = first(form),
+    filing_date = first(filing_date),
+    report_date = first(report_date),
+    primary_document = first(primary_document),
+    primary_doc_description = first(primary_doc_description),
+    source_submissions_path = paste(
+      sort(unique(source_submissions_path[!is.na(source_submissions_path) & source_submissions_path != ""])),
+      collapse = " | "
+    ),
+    .groups = "drop"
+  )
 
 tenk_index <- filings |>
-  filter(form %in% c("10-K", "10-K/A", "10-KT")) |>
   left_join(crosswalk, by = "cik10", relationship = "many-to-one") |>
   mutate(
     accession_number_no_dashes = str_remove_all(accession_number, "-"),
@@ -169,6 +199,8 @@ qc_rows <- tibble(
     "indexed_10k_filings",
     "indexed_builder_era_10k_filings",
     "unique_sec_reporting_builders_with_10k",
+    "duplicate_submission_filing_rows_collapsed",
+    "manual_10k_filing_seeds",
     "benchmark_pulte_2011_indexed",
     "benchmark_d_r_horton_2024_indexed",
     "benchmark_lennar_2024_indexed",
@@ -179,6 +211,8 @@ qc_rows <- tibble(
     if_else(nrow(tenk_index) > 0, "ok", "fail"),
     if_else(sum(tenk_index$main_builder_era_flag, na.rm = TRUE) > 0, "ok", "warn"),
     if_else(n_distinct(tenk_index$cik10) > 0, "ok", "fail"),
+    if_else(nrow(duplicate_submission_groups) == 0, "ok", "warn"),
+    if_else(nrow(manual_filing_seeds) > 0, "ok", "ok"),
     if_else(any(benchmark_filings$benchmark_name == "pulte_2011" & benchmark_filings$indexed_flag), "ok", "warn"),
     if_else(any(benchmark_filings$benchmark_name == "d_r_horton_2024" & benchmark_filings$indexed_flag), "ok", "warn"),
     if_else(any(benchmark_filings$benchmark_name == "lennar_2024" & benchmark_filings$indexed_flag), "ok", "warn"),
@@ -189,6 +223,8 @@ qc_rows <- tibble(
     nrow(tenk_index),
     sum(tenk_index$main_builder_era_flag, na.rm = TRUE),
     n_distinct(tenk_index$cik10),
+    nrow(duplicate_submission_groups),
+    nrow(manual_filing_seeds),
     as.integer(any(benchmark_filings$benchmark_name == "pulte_2011" & benchmark_filings$indexed_flag)),
     as.integer(any(benchmark_filings$benchmark_name == "d_r_horton_2024" & benchmark_filings$indexed_flag)),
     as.integer(any(benchmark_filings$benchmark_name == "lennar_2024" & benchmark_filings$indexed_flag)),
@@ -199,6 +235,8 @@ qc_rows <- tibble(
     "",
     "Fiscal year inferred from report date, falling back to filing date.",
     "",
+    "Same accession can appear in SEC recent submissions and older submission shards; accession rows are collapsed before downstream joins.",
+    "Tracked task-local manual accessions added when SEC submissions JSON omits a public 10-K known from EDGAR.",
     rep("Benchmark accession availability check.", 4)
   )
 )

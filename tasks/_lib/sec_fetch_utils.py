@@ -127,7 +127,10 @@ def fetch_to_path(url, dest_path, user_agent):
             "http_status": "",
             "bytes": dest_path.stat().st_size,
             "error": "",
-            "downloaded_at_utc": utc_now(),
+            "downloaded_at_utc": dt.datetime.fromtimestamp(
+                dest_path.stat().st_mtime,
+                dt.timezone.utc,
+            ).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
 
     http_status, body, error = fetch_url(url, user_agent)
@@ -157,11 +160,18 @@ def write_csv(path, rows, fieldnames):
     path.parent.mkdir(parents=True, exist_ok=True)
     import csv
 
-    with path.open("w", newline="") as f:
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    with temp_path.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
+
+    if path.exists() and path.read_bytes() == temp_path.read_bytes():
+        temp_path.unlink()
+        path.touch()
+    else:
+        temp_path.replace(path)
 
 
 def read_json(path):

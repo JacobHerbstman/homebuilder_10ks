@@ -1,0 +1,14 @@
+builder_name_key,sample_disposition,scope_reason
+weyerhaeuser real estate co,included_public_parent_segment,Diversified U.S. parent 10-K reports WRECO as a distinct homebuilding segment; retain segment-level comparability review and do not splice into Tri Pointe before the 2014 transaction.
+jim walter homes,included_operating_only_on_your_lot,Walter Industries 10-K reports Jim Walter Homes as a distinct on-your-lot segment; operating outcomes are usable but a land-owned versus optioned share is structurally noncomparable.
+levitt and sons,included_land_pipeline_no_omega,Public-parent filings contain the Levitt homebuilding pipeline but current developments combine owned and unquantified optioned lots.
+capital pacific holdings,included_no_builder_era_sec_overlap,Builder marks the firm public through 2006 but the located SEC annual-report series ends with fiscal 2003.
+brookfield residential properties,excluded_foreign_reporter_no_us_10k,Canadian public reporter does not provide a comparable U.S. 10-K series; retain Brookfield Homes separately through its U.S. SEC-reporting predecessor window.
+morrison homes,excluded_foreign_parent_no_us_10k,Historical U.S. operating label belonged to a foreign public parent and has no comparable U.S. SEC 10-K series.
+taylor woodrow homes,excluded_foreign_parent_no_us_10k,Historical U.S. operating label belonged to a foreign public parent and has no comparable U.S. SEC 10-K series.
+st joe co,excluded_diversified_developer,Public U.S. parent is a diversified land developer rather than a comparable for-sale production homebuilder.
+st joe towns and resorts,excluded_diversified_developer,Builder label is the residential operation of the diversified St. Joe public parent rather than a comparable production-builder reporter.
+wl homes,excluded_foreign_parent_no_us_10k,Builder observation follows acquisition by a foreign public parent and has no standalone U.S. SEC 10-K for the Builder-public year.
+suncor development co,excluded_parent_segment_below_top100,Small public-parent development segment appears only in the Next 100 and lacks a comparable standalone production-builder lot disclosure series.
+amh,excluded_build_to_rent_reit,Build-to-rent REIT is not comparable to for-sale production builders; retain in Builder denominators but not the land-share sample.
+sekisui house u s,excluded_foreign_parent_no_us_10k,Foreign public parent has no comparable U.S. SEC 10-K for the U.S. homebuilding operation.

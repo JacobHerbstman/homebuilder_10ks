@@ -1,0 +1,2 @@
+ticker,cik10,accession_number,form,filing_date,report_date,primary_document,primary_doc_description,manual_seed_note
+NVR,0000906163,0000950133-09-000438,10-K,2009-02-25,2008-12-31,w72880e10vk.htm,FORM 10-K,SEC submissions JSON shard omits this public FY2008 NVR 10-K accession; audited against EDGAR filing URL.

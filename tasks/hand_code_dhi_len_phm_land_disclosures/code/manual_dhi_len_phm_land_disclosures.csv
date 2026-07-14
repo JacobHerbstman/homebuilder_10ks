@@ -1,0 +1,61 @@
+ticker,fiscal_year,unit_type,disclosure_basis,source_table_index,owned_physical_count,nonowned_controlled_physical_count,optioned_physical_count,jv_physical_count,optioned_approved_for_purchase,optioned_pending_approval,total_physical_count,approximate_flag,manual_review_flag,manual_review_reason,source_note
+DHI,2006,lots,land_lot_position_table,60,190000,133000,133000,,,,323000,FALSE,FALSE,,DHI table labels nonowned count as controlled under lot option and similar contracts.
+DHI,2007,lots,land_lot_position_table,71,167000,63000,63000,,,,230000,FALSE,FALSE,,DHI table labels nonowned count as controlled under lot option and similar contracts.
+DHI,2008,lots,land_lot_position_table,78,99000,26000,26000,,,,125000,FALSE,FALSE,,DHI table labels nonowned count as controlled under lot option and similar contracts.
+DHI,2009,lots,land_lot_position_table,73,89500,26500,26500,,,,116000,FALSE,FALSE,,DHI table labels nonowned count as controlled under lot option and similar contracts.
+DHI,2010,lots,land_lot_position_table,51,89700,29700,29700,,,,119400,FALSE,FALSE,,DHI table labels nonowned count as controlled under lot option and similar contracts.
+DHI,2011,lots,land_lot_position_table,50,85800,26900,26900,,,,112700,FALSE,FALSE,,DHI table labels nonowned count as controlled under lot option and similar contracts.
+DHI,2012,lots,land_lot_position_table,130,94600,58100,58100,,,,152700,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under lot option and similar contracts.
+DHI,2013,lots,land_lot_position_table,134,126600,54300,54300,,,,180900,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under land and lot option purchase contracts.
+DHI,2014,lots,land_lot_position_table,138,124600,58900,58900,,,,183500,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under land and lot option purchase contracts.
+DHI,2015,lots,land_lot_position_table,140,118400,55500,55500,,,,173900,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under land and lot option purchase contracts.
+DHI,2016,lots,land_lot_position_table,140,112900,91600,91600,,,,204500,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under land and lot option purchase contracts.
+DHI,2017,lots,land_lot_position_table,139,125000,124000,124000,,,,249000,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under land and lot option purchase contracts.
+DHI,2018,lots,land_lot_position_table,149,124300,164200,164200,,,,288500,FALSE,FALSE,,DHI table labels nonowned count as lots controlled under land and lot option purchase contracts.
+DHI,2019,lots,land_lot_position_table,,121400,185900,185900,,,,307300,FALSE,FALSE,,DHI land-lot position table reports owned lots and lots controlled under land and lot purchase contracts.
+DHI,2020,lots,land_lot_position_table,,112600,264300,264300,,,,376900,FALSE,FALSE,,DHI land-lot position table reports owned lots and lots controlled under land and lot purchase contracts.
+DHI,2021,lots,land_lot_position_table,,127800,402500,402500,,,,530300,FALSE,FALSE,,DHI land-lot position table reports owned lots and lots controlled under land and lot purchase contracts.
+DHI,2022,lots,land_lot_position_table,,131100,442100,442100,,,,573200,FALSE,FALSE,,DHI land-lot position table reports owned lots and lots controlled under land and lot purchase contracts.
+DHI,2023,lots,land_lot_position_table,,141100,427300,427300,,,,568400,FALSE,FALSE,,DHI land-lot position table reports owned lots and lots controlled under land and lot purchase contracts.
+DHI,2024,lots,land_lot_position_table,,152500,480400,480400,,,,632900,FALSE,FALSE,,DHI benchmark year; table reports 152500 owned lots and 480400 lots controlled through land and lot purchase contracts.
+DHI,2025,lots,land_lot_position_table,,147000,444900,444900,,,,591900,FALSE,FALSE,,DHI land-lot position table reports owned lots and lots controlled under land and lot purchase contracts.
+LEN,2006,homesites,controlled_homesites_table,,92325,189279,94758,94521,,,281604,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites; 2006 row is also restated in the 2007 10-K.
+LEN,2007,homesites,controlled_homesites_table,42,62801,85870,22877,62993,,,148671,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2008,homesites,controlled_homesites_table,47,74681,38589,12718,25871,,,113270,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2009,homesites,controlled_homesites_table,74,82703,21173,7423,13750,,,103876,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2010,homesites,controlled_homesites_table,73,84482,19974,8490,11484,,,104456,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2011,homesites,controlled_homesites_table,89,94684,16702,8314,8388,,,111386,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2012,homesites,controlled_homesites_table,112,107138,21346,13312,8034,,,128484,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2013,homesites,controlled_homesites_table,127,125643,28133,20966,7167,,,153776,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2014,homesites,controlled_homesites_table,148,132679,31890,24855,7035,,,164569,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2015,homesites,controlled_homesites_table,151,125914,39949,33491,6458,,,165863,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2016,homesites,controlled_homesites_table,130,125879,33166,26650,6516,,,159045,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2017,homesites,controlled_homesites_table,142,141126,37527,32082,5445,,,178653,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2018,homesites,controlled_homesites_table,135,201648,68623,59289,9334,,,270271,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2019,homesites,controlled_homesites_table,106,209032,104210,81887,22323,,,313242,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2020,homesites,controlled_homesites_table,38,186607,119283,100409,18874,,,305890,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2021,homesites,controlled_homesites_table,38,181961,257509,251423,6086,,,439470,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2022,homesites,controlled_homesites_table,40,165707,281409,275651,5758,,,447116,FALSE,FALSE,,Lennar controlled homesites equal optioned plus JV homesites.
+LEN,2023,homesites,controlled_homesites_table,40,99815,309700,,,,,409515,FALSE,FALSE,,Lennar no longer splits controlled homesites into optioned and JV homesites in this table.
+LEN,2024,homesites,controlled_homesites_table,40,85428,393649,,,,,479077,FALSE,FALSE,,Lennar benchmark year; table reports controlled homesites and owned homesites but no optioned/JV split.
+LEN,2025,homesites,controlled_homesites_table,39,9525,496250,,,,,505775,FALSE,FALSE,,Lennar table reports a sharp drop in owned homesites and 0.1 years supply owned; retain with provenance flag for economic interpretation.
+PHM,2006,lots,controlled_lots_prose_and_segment_table,,158800,73400,73400,,63700,9700,232200,TRUE,FALSE,,Pulte prose says approximately 232200 controlled lots; segment table total is 232223. Use rounded prose components for identity.
+PHM,2007,lots,controlled_lots_prose_and_segment_table,,131400,26500,26500,,24800,1700,157900,TRUE,FALSE,,Pulte prose says approximately 157900 controlled lots; segment table total is 157858. Use rounded prose components for identity.
+PHM,2008,lots,controlled_lots_prose_and_segment_table,,97473,23323,23323,,23250,73,120796,FALSE,FALSE,,Pulte prose and segment table report 120796 controlled lots.
+PHM,2009,lots,controlled_lots_prose_and_segment_table,,138273,16421,16421,,14208,2213,154694,FALSE,FALSE,,Pulte 2009 and 2010 filings report owned lots and approved/pending option lots.
+PHM,2010,lots,controlled_lots_prose_and_segment_table,49,131964,15230,15230,,10082,5148,147194,FALSE,FALSE,,Pulte 2010 filing reports owned lots and approved/pending option lots.
+PHM,2011,lots,owned_optioned_controlled_lots_table,,116933,14077,14077,,10060,4017,131010,FALSE,FALSE,,Pulte benchmark year; owned plus optioned equals controlled lots.
+PHM,2012,lots,owned_optioned_controlled_lots_table,,103060,16815,16815,,,,119875,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2013,lots,owned_optioned_controlled_lots_table,,95212,28266,28266,,,,123478,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2014,lots,owned_optioned_controlled_lots_table,,96220,34573,34573,,,,130793,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2015,lots,owned_optioned_controlled_lots_table,,95919,42160,42160,,,,138079,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2016,lots,owned_optioned_controlled_lots_table,,99279,43979,43979,,,,143258,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2017,lots,owned_optioned_controlled_lots_table,,89253,52156,52156,,,,141409,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2018,lots,owned_optioned_controlled_lots_table,,89530,60047,60047,,,,149577,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2019,lots,owned_optioned_controlled_lots_table,,93359,64903,64903,,,,158262,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2020,lots,owned_optioned_controlled_lots_table,,91363,88989,88989,,,,180352,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2021,lots,owned_optioned_controlled_lots_table,,109078,119218,119218,,,,228296,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2022,lots,owned_optioned_controlled_lots_table,,108848,102264,102264,,,,211112,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2023,lots,owned_optioned_controlled_lots_table,,104515,118115,118115,,,,222630,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2024,lots,owned_optioned_controlled_lots_table,,102176,132413,132413,,,,234589,FALSE,FALSE,,Pulte table reports owned and optioned lots.
+PHM,2025,lots,owned_optioned_controlled_lots_table,,101104,133528,133528,,,,234632,FALSE,FALSE,,Pulte table reports owned and optioned lots.

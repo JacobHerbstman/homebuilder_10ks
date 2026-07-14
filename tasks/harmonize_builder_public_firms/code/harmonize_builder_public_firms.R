@@ -10,32 +10,6 @@ suppressPackageStartupMessages({
 
 source("../../_lib/homebuilder_pipeline_utils.R")
 
-as_manual_bool <- function(x) {
-  out <- str_to_lower(str_squish(as.character(x)))
-  out %in% c("true", "t", "1", "yes")
-}
-
-first_or_blank <- function(x) {
-  x <- x[!is.na(x) & x != ""]
-  if (length(x) == 0) {
-    return("")
-  }
-  x[[1]]
-}
-
-collapse_unique <- function(x) {
-  x <- sort(unique(x[!is.na(x) & x != ""]))
-  paste(x, collapse = " | ")
-}
-
-first_number_or_na <- function(x) {
-  x <- x[!is.na(x)]
-  if (length(x) == 0) {
-    return(NA_real_)
-  }
-  x[[1]]
-}
-
 public_roster <- read_csv("../input/builder_public_firm_roster.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(builder_name_key = as.character(builder_name_key))
 
@@ -45,8 +19,17 @@ builder_panel <- read_parquet("../input/builder_panel.parquet") |>
 sec_crosswalk <- read_csv("../input/builder_sec_crosswalk.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     builder_name_key = as.character(builder_name_key),
+    ticker = as.character(ticker),
     cik = as.character(cik),
-    cik10 = as.character(cik10)
+    cik10 = as.character(cik10),
+    sec_company_name = as.character(sec_company_name),
+    match_method = as.character(match_method),
+    sec_reporting_indicator = str_to_lower(str_squish(as.character(sec_reporting_indicator))) %in% c("true", "t", "1", "yes"),
+    public_parent_no_comparable_us_10k = str_to_lower(str_squish(as.character(public_parent_no_comparable_us_10k))) %in% c("true", "t", "1", "yes"),
+    manual_review_indicator = str_to_lower(str_squish(as.character(manual_review_indicator))) %in% c("true", "t", "1", "yes"),
+    valid_from_year = as.integer(valid_from_year),
+    valid_to_year = as.integer(valid_to_year),
+    notes = as.character(notes)
   ) |>
   select(
     builder_name_key, ticker, cik, cik10, sec_company_name, match_method,
@@ -55,18 +38,35 @@ sec_crosswalk <- read_csv("../input/builder_sec_crosswalk.csv", show_col_types =
   ) |>
   rename(sec_crosswalk_notes = notes)
 
+sec_crosswalk_firm_level <- sec_crosswalk |>
+  group_by(builder_name_key) |>
+  summarise(
+    ticker = paste(sort(unique(ticker[!is.na(ticker) & ticker != ""])), collapse = " | "),
+    cik = paste(sort(unique(cik[!is.na(cik) & cik != ""])), collapse = " | "),
+    cik10 = paste(sort(unique(cik10[!is.na(cik10) & cik10 != ""])), collapse = " | "),
+    sec_company_name = paste(sort(unique(sec_company_name[!is.na(sec_company_name) & sec_company_name != ""])), collapse = " | "),
+    match_method = paste(sort(unique(match_method[!is.na(match_method) & match_method != ""])), collapse = " | "),
+    sec_reporting_indicator = any(sec_reporting_indicator %in% TRUE, na.rm = TRUE),
+    public_parent_no_comparable_us_10k = any(public_parent_no_comparable_us_10k %in% TRUE, na.rm = TRUE),
+    manual_review_indicator = any(manual_review_indicator %in% TRUE, na.rm = TRUE),
+    valid_from_year = if (all(is.na(valid_from_year))) NA_integer_ else min(valid_from_year, na.rm = TRUE),
+    valid_to_year = if (all(is.na(valid_to_year))) NA_integer_ else max(valid_to_year, na.rm = TRUE),
+    sec_crosswalk_notes = paste(sort(unique(sec_crosswalk_notes[!is.na(sec_crosswalk_notes) & sec_crosswalk_notes != ""])), collapse = " | "),
+    .groups = "drop"
+  )
+
 manual_harmonization <- read_csv("manual_builder_public_firm_harmonization.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     builder_name_key = as.character(builder_name_key),
-    collapse_indicator = as_manual_bool(collapse_indicator),
-    manual_review_indicator_harmonization = as_manual_bool(manual_review_indicator_harmonization)
+    collapse_indicator = str_to_lower(str_squish(as.character(collapse_indicator))) %in% c("true", "t", "1", "yes"),
+    manual_review_indicator_harmonization = str_to_lower(str_squish(as.character(manual_review_indicator_harmonization))) %in% c("true", "t", "1", "yes")
   )
 
 manual_pairs <- read_csv("manual_builder_public_firm_harmonization_pairs.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     builder_name_key_1 = as.character(builder_name_key_1),
     builder_name_key_2 = as.character(builder_name_key_2),
-    collapse_allowed = as_manual_bool(collapse_allowed)
+    collapse_allowed = str_to_lower(str_squish(as.character(collapse_allowed))) %in% c("true", "t", "1", "yes")
   )
 
 manual_lifecycle <- read_csv("manual_builder_public_firm_lifecycle.csv", show_col_types = FALSE, na = c("", "NA")) |>
@@ -74,7 +74,7 @@ manual_lifecycle <- read_csv("manual_builder_public_firm_lifecycle.csv", show_co
     builder_name_key = as.character(builder_name_key),
     event_year = as.integer(event_year),
     last_standalone_year = as.integer(last_standalone_year),
-    lifecycle_manual_review_indicator = as_manual_bool(lifecycle_manual_review_indicator)
+    lifecycle_manual_review_indicator = str_to_lower(str_squish(as.character(lifecycle_manual_review_indicator))) %in% c("true", "t", "1", "yes")
   )
 
 if (nrow(manual_harmonization) != n_distinct(manual_harmonization$builder_name_key)) {
@@ -115,7 +115,7 @@ if (length(missing_pair_keys) > 0) {
 harmonized <- public_roster |>
   left_join(manual_harmonization, by = "builder_name_key", relationship = "one-to-one") |>
   left_join(manual_lifecycle, by = "builder_name_key", relationship = "one-to-one") |>
-  left_join(sec_crosswalk, by = "builder_name_key", relationship = "one-to-one") |>
+  left_join(sec_crosswalk_firm_level, by = "builder_name_key", relationship = "one-to-one") |>
   mutate(
     harmonized_builder_id = coalesce(harmonized_builder_id, builder_name_key),
     harmonized_builder_name = coalesce(harmonized_builder_name, builder_name_clean),
@@ -142,30 +142,30 @@ harmonization_groups <- harmonized |>
   group_by(harmonized_builder_id, harmonized_builder_name) |>
   summarise(
     input_builder_name_keys = n(),
-    builder_name_keys = collapse_unique(builder_name_key),
-    builder_names_observed = collapse_unique(builder_name_clean),
+    builder_name_keys = paste(sort(unique(builder_name_key[!is.na(builder_name_key) & builder_name_key != ""])), collapse = " | "),
+    builder_names_observed = paste(sort(unique(builder_name_clean[!is.na(builder_name_clean) & builder_name_clean != ""])), collapse = " | "),
     first_list_year = min(first_list_year, na.rm = TRUE),
     last_list_year = max(last_list_year, na.rm = TRUE),
     first_public_list_year = min(first_public_list_year, na.rm = TRUE),
     last_public_list_year = max(last_public_list_year, na.rm = TRUE),
     public_years_total_before_dedup = sum(public_years, na.rm = TRUE),
     best_rank = min(best_rank, na.rm = TRUE),
-    sec_cik10s = collapse_unique(cik10),
-    tickers = collapse_unique(ticker),
-    sec_company_names = collapse_unique(sec_company_name),
+    sec_cik10s = paste(sort(unique(cik10[!is.na(cik10) & cik10 != ""])), collapse = " | "),
+    tickers = paste(sort(unique(ticker[!is.na(ticker) & ticker != ""])), collapse = " | "),
+    sec_company_names = paste(sort(unique(sec_company_name[!is.na(sec_company_name) & sec_company_name != ""])), collapse = " | "),
     any_sec_reporting = any(sec_reporting_indicator %in% TRUE, na.rm = TRUE),
     any_public_parent_no_comparable_us_10k = any(public_parent_no_comparable_us_10k %in% TRUE, na.rm = TRUE),
     any_sec_manual_review = any(manual_review_indicator %in% TRUE, na.rm = TRUE),
     any_harmonization_manual_review = any(manual_review_indicator_harmonization %in% TRUE, na.rm = TRUE),
     collapsed_from_multiple_builder_keys = n() > 1,
-    harmonization_actions = collapse_unique(harmonization_action),
-    same_firm_confidences = collapse_unique(same_firm_confidence),
-    evidence_urls = collapse_unique(source_url),
-    evidence_notes = collapse_unique(source_note),
-    lifecycle_statuses = collapse_unique(lifecycle_status),
-    successor_builder_names = collapse_unique(successor_builder_name),
-    lifecycle_evidence_urls = collapse_unique(lifecycle_source_url),
-    notes = collapse_unique(notes),
+    harmonization_actions = paste(sort(unique(harmonization_action[!is.na(harmonization_action) & harmonization_action != ""])), collapse = " | "),
+    same_firm_confidences = paste(sort(unique(same_firm_confidence[!is.na(same_firm_confidence) & same_firm_confidence != ""])), collapse = " | "),
+    evidence_urls = paste(sort(unique(source_url[!is.na(source_url) & source_url != ""])), collapse = " | "),
+    evidence_notes = paste(sort(unique(source_note[!is.na(source_note) & source_note != ""])), collapse = " | "),
+    lifecycle_statuses = paste(sort(unique(lifecycle_status[!is.na(lifecycle_status) & lifecycle_status != ""])), collapse = " | "),
+    successor_builder_names = paste(sort(unique(successor_builder_name[!is.na(successor_builder_name) & successor_builder_name != ""])), collapse = " | "),
+    lifecycle_evidence_urls = paste(sort(unique(lifecycle_source_url[!is.na(lifecycle_source_url) & lifecycle_source_url != ""])), collapse = " | "),
+    notes = paste(sort(unique(notes[!is.na(notes) & notes != ""])), collapse = " | "),
     .groups = "drop"
   ) |>
   arrange(first_public_list_year, best_rank, harmonized_builder_name)
@@ -187,8 +187,8 @@ same_cik_not_collapsed <- harmonized |>
     harmonized_builder_id_2 = paste(harmonized_builder_id[-1], collapse = " | "),
     cik10_1 = first(cik10),
     cik10_2 = first(cik10),
-    ticker_1 = first_or_blank(ticker),
-    ticker_2 = collapse_unique(ticker[-1]),
+    ticker_1 = first(ticker[!is.na(ticker) & ticker != ""], default = ""),
+    ticker_2 = paste(sort(unique(ticker[-1][!is.na(ticker[-1]) & ticker[-1] != ""])), collapse = " | "),
     source_url = "",
     source_note = "",
     notes = "Same SEC CIK appears under multiple uncollapsed Builder labels. Review before collapsing because same public parent can mask divisions, brands, or non-comparable entities.",
@@ -278,15 +278,15 @@ builder_public_firm_year_identifiers <- builder_panel |>
   arrange(builder_name_key, list_year, rank) |>
   group_by(builder_name_key, list_year) |>
   summarise(
-    builder_activity_year = as.integer(first_number_or_na(underlying_closings_year)),
-    list_types = collapse_unique(list_type),
-    best_builder_rank = first_number_or_na(rank),
+    builder_activity_year = as.integer(first(underlying_closings_year[!is.na(underlying_closings_year)], default = NA_real_)),
+    list_types = paste(sort(unique(list_type[!is.na(list_type) & list_type != ""])), collapse = " | "),
+    best_builder_rank = first(rank[!is.na(rank)], default = NA_real_),
     builder_public_flag = any(builder_public_flag %in% TRUE, na.rm = TRUE),
-    builder_name_clean = first_or_blank(builder_name_clean),
-    builder_name_raw = first_or_blank(builder_name_raw),
-    total_closings = first_number_or_na(total_closings),
-    gross_revenue_homebuilding_millions = first_number_or_na(gross_revenue_homebuilding_millions),
-    source_urls = collapse_unique(source_url),
+    builder_name_clean = first(builder_name_clean[!is.na(builder_name_clean) & builder_name_clean != ""], default = ""),
+    builder_name_raw = first(builder_name_raw[!is.na(builder_name_raw) & builder_name_raw != ""], default = ""),
+    total_closings = first(total_closings[!is.na(total_closings)], default = NA_real_),
+    gross_revenue_homebuilding_millions = first(gross_revenue_homebuilding_millions[!is.na(gross_revenue_homebuilding_millions)], default = NA_real_),
+    source_urls = paste(sort(unique(source_url[!is.na(source_url) & source_url != ""])), collapse = " | "),
     .groups = "drop"
   ) |>
   mutate(builder_activity_year = coalesce(builder_activity_year, as.integer(list_year))) |>

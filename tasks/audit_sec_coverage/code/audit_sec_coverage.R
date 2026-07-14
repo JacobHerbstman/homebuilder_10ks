@@ -9,28 +9,20 @@ suppressPackageStartupMessages({
 
 source("../../_lib/homebuilder_pipeline_utils.R")
 
-as_task_bool <- function(x) {
-  x %in% c(TRUE, "TRUE", "true", "True", "1", 1)
-}
-
-as_task_int <- function(x) {
-  suppressWarnings(as.integer(as.character(x)))
-}
-
 crosswalk <- read_csv("../input/builder_sec_crosswalk.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
-    sec_reporting_indicator = as_task_bool(sec_reporting_indicator),
-    public_parent_no_comparable_us_10k = as_task_bool(public_parent_no_comparable_us_10k),
-    manual_review_indicator = as_task_bool(manual_review_indicator),
-    ever_marked_public = as_task_bool(ever_marked_public),
-    first_public_list_year = as_task_int(first_public_list_year),
-    last_public_list_year = as_task_int(last_public_list_year),
+    sec_reporting_indicator = sec_reporting_indicator %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    public_parent_no_comparable_us_10k = public_parent_no_comparable_us_10k %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    manual_review_indicator = manual_review_indicator %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    ever_marked_public = ever_marked_public %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    first_public_list_year = suppressWarnings(as.integer(as.character(first_public_list_year))),
+    last_public_list_year = suppressWarnings(as.integer(as.character(last_public_list_year))),
     cik10 = as.character(cik10)
   )
 
 filing_index <- read_csv("../input/sec_10k_filing_index.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
-    fiscal_year = as_task_int(fiscal_year),
+    fiscal_year = suppressWarnings(as.integer(as.character(fiscal_year))),
     filing_date = suppressWarnings(as.Date(filing_date)),
     report_date = suppressWarnings(as.Date(report_date)),
     cik10 = as.character(cik10),
@@ -41,7 +33,7 @@ filing_index <- read_csv("../input/sec_10k_filing_index.csv", show_col_types = F
 
 download_inventory <- read_csv("../input/sec_10k_download_inventory.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
-    fiscal_year = as_task_int(fiscal_year),
+    fiscal_year = suppressWarnings(as.integer(as.character(fiscal_year))),
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
     ticker = as.character(ticker)
@@ -61,7 +53,7 @@ mention_flags <- read_csv("../input/tenk_land_mention_flags.csv", show_col_types
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
     ticker = as.character(ticker),
-    land_term_hit_count = as_task_int(land_term_hit_count)
+    land_term_hit_count = suppressWarnings(as.integer(as.character(land_term_hit_count)))
   ) |>
   filter(!is.na(accession_number))
 

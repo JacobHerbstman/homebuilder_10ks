@@ -1,0 +1,73 @@
+ticker,fiscal_year,orders_units,orders_value_thousands,orders_metric_label,orders_units_available,deliveries_units,delivery_metric_label,backlog_units,backlog_value_thousands,cancellation_rate_pct,active_communities,average_community_count,source_note
+DHI,2012,21048,4803300,net_sales_orders,TRUE,18890,homes_closed,,,,,,DHI 2012 10-K Net Sales Orders and Homes Closed tables.
+DHI,2013,25120,6567000,net_sales_orders,TRUE,24155,homes_closed,,,,,,DHI 2013 10-K Net Sales Orders and Homes Closed tables.
+DHI,2014,29709,8308600,net_sales_orders,TRUE,28670,homes_closed,,,,,,DHI 2014 10-K Net Sales Orders and Homes Closed tables.
+DHI,2015,37380,10738700,net_sales_orders,TRUE,36648,homes_closed,,,,,,DHI 2015 10-K Net Sales Orders and Homes Closed tables.
+DHI,2016,40814,12000200,net_sales_orders,TRUE,40309,homes_closed,,,,,,DHI 2016 10-K Net Sales Orders and Home Closings tables.
+DHI,2017,46605,13941200,net_sales_orders,TRUE,45751,homes_closed,,,,,,DHI 2017 10-K Net Sales Orders and Home Closings tables.
+DHI,2018,52740,15760700,net_sales_orders,TRUE,51857,homes_closed,,,,,,DHI 2018 10-K Net Sales Orders and Home Closings tables.
+DHI,2019,56565,16843400,net_sales_orders,TRUE,56975,homes_closed,,,,,,DHI 2019 10-K Net Sales Orders and Homes Closed tables.
+DHI,2020,78458,23606300,net_sales_orders,TRUE,65388,homes_closed,,,,,,DHI 2020 10-K Net Sales Orders and Homes Closed tables.
+DHI,2021,81378,27748200,net_sales_orders,TRUE,81965,homes_closed,,,,,,DHI 2021 10-K Net Sales Orders and Home Closings tables.
+DHI,2022,76137,30373600,net_sales_orders,TRUE,82744,homes_closed,,,,,,DHI 2022 10-K Net Sales Orders and Homes Closed tables.
+DHI,2023,78342,29527900,net_sales_orders,TRUE,82917,homes_closed,,,,,,DHI 2023 10-K Net Sales Orders and Homes Closed tables.
+LEN,2012,15684,,new_orders_including_unconsolidated_entities,TRUE,13802,home_deliveries_including_unconsolidated_entities,4053,1160385,,,,LEN 2012 10-K Homebuilding Data table.
+LEN,2013,19043,,new_orders_including_unconsolidated_entities,TRUE,18290,home_deliveries_including_unconsolidated_entities,4806,1619601,,,,LEN 2013 10-K Homebuilding Data table.
+LEN,2014,22029,,new_orders_including_unconsolidated_entities,TRUE,21003,home_deliveries_including_unconsolidated_entities,5832,1974328,,,,LEN 2014 10-K Homebuilding Data table.
+LEN,2015,25106,,new_orders_including_unconsolidated_entities,TRUE,24292,home_deliveries_including_unconsolidated_entities,6646,2477751,,,,LEN 2015 10-K Homebuilding Data table.
+LEN,2016,27372,,new_orders_including_unconsolidated_entities,TRUE,26563,home_deliveries_including_unconsolidated_entities,7623,2891538,,,,LEN 2016 10-K Homebuilding Data table.
+LEN,2017,30348,,new_orders_including_unconsolidated_entities,TRUE,29394,home_deliveries_including_unconsolidated_entities,8935,3550366,,,,LEN 2017 10-K Homebuilding Data table.
+LEN,2018,45826,,new_orders_including_unconsolidated_entities,TRUE,45627,home_deliveries_including_unconsolidated_entities,15616,6570123,,,,LEN 2018 10-K Homebuilding Data table; CalAtlantic acquisition affects comparability.
+LEN,2019,51439,,new_orders_including_unconsolidated_entities,TRUE,51491,home_deliveries_including_unconsolidated_entities,15577,6300542,,,,LEN 2019 10-K Homebuilding Data table.
+LEN,2020,56169,22388650,new_orders_including_unconsolidated_entities,TRUE,52925,home_deliveries_including_unconsolidated_entities,18821,7812971,15,1177,,LEN 2020 10-K Homebuilding Data and new-order/backlog table; cancellation rate stated in Backlog section.
+LEN,2021,64543,28853203,new_orders_including_unconsolidated_entities,TRUE,59825,home_deliveries_including_unconsolidated_entities,23771,11362266,10,1263,,LEN 2021 10-K New Orders and Backlog tables; cancellation rate stated in Backlog section.
+LEN,2022,61105,29086950,new_orders_including_unconsolidated_entities,TRUE,66399,home_deliveries_including_unconsolidated_entities,18869,8740868,17,1208,,LEN 2022 10-K New Orders and Backlog tables; cancellation rate table total.
+LEN,2023,69111,30508555,new_orders_including_unconsolidated_entities,TRUE,73087,home_deliveries_including_unconsolidated_entities,14892,6633750,16,1260,,LEN 2023 10-K New Orders and Backlog tables; delivery count stated in Homebuilding Operations Overview.
+PHM,2012,19039,5424300,net_new_orders,TRUE,16505,closings,6458,1931538,15,670,,PulteGroup 2012 10-K supplemental data table.
+PHM,2013,17080,5394566,net_new_orders,TRUE,17766,closings,5772,1901796,15,577,,PulteGroup 2013 10-K supplemental data table.
+PHM,2014,16652,5558937,net_new_orders,TRUE,17196,closings,5850,1943861,15,598,,PulteGroup 2014 10-K supplemental data table.
+PHM,2015,18008,6305380,net_new_orders,TRUE,17127,closings,6731,2456565,14,620,,PulteGroup 2015 10-K supplemental data table.
+PHM,2016,20326,7753399,net_new_orders,TRUE,19951,closings,7422,2941512,15,726,,PulteGroup 2016 10-K supplemental data table.
+PHM,2017,22626,9361534,net_new_orders,TRUE,21052,closings,8996,3979064,14,790,,PulteGroup 2017 10-K supplemental data table.
+PHM,2018,22833,9675529,net_new_orders,TRUE,23107,closings,8722,3836147,14,815,,PulteGroup 2018 10-K supplemental data table.
+PHM,2019,24977,10615363,net_new_orders,TRUE,23232,closings,10507,4535805,14,863,,PulteGroup 2019 10-K supplemental data table.
+PHM,2020,29275,12837272,net_new_orders,TRUE,24624,closings,15158,,14,874,,PulteGroup 2020 10-K operating metrics tables.
+PHM,2021,31739,16442441,net_new_orders,TRUE,28894,closings,18003,,9,799,,PulteGroup 2021 10-K operating metrics tables.
+PHM,2022,23277,13589392,net_new_orders,TRUE,29111,closings,12169,,19,810,,PulteGroup 2022 10-K operating metrics tables.
+PHM,2023,28580,15244353,net_new_orders,TRUE,28603,closings,12146,,16,906,,PulteGroup 2023 10-K operating metrics tables.
+KBH,2012,6703,1733146,net_orders,TRUE,6282,homes_delivered,2577,618626,31,191,180,KB Home 2012 10-K homebuilding data and net-order table; average community count recovered from 2013 comparative table.
+KBH,2013,7125,2157065,net_orders,TRUE,7145,homes_delivered,2557,682489,32,191,182,KB Home 2013 10-K homebuilding data and net-order table.
+KBH,2014,7567,2579951,net_orders,TRUE,7215,homes_delivered,2909,914025,31,227,200,KB Home 2014 10-K homebuilding data and net-order table.
+KBH,2015,9253,3255170,net_orders,TRUE,8196,homes_delivered,3966,1281478,27,247,244,KB Home 2015 10-K homebuilding data and net-order table.
+KBH,2016,10283,3813155,net_orders,TRUE,9829,homes_delivered,4420,1519089,25,235,238,KB Home 2016 10-K homebuilding data and net-order table.
+KBH,2017,10900,4476247,net_orders,TRUE,10909,homes_delivered,4411,1660131,24,224,233,KB Home 2017 10-K homebuilding data and net-order table.
+KBH,2018,11014,4291481,net_orders,TRUE,11317,homes_delivered,4108,1434368,22,240,223,KB Home 2018 10-K homebuilding data and net-order table.
+KBH,2019,12841,4890153,net_orders,TRUE,11871,homes_delivered,5078,1813707,19,251,250,KB Home 2019 10-K homebuilding data and net-order table.
+KBH,2020,13404,5299489,net_orders,TRUE,10672,homes_delivered,7810,2962403,20,236,243,KB Home 2020 10-K net orders and deliveries tables.
+KBH,2021,16206,7683990,net_orders,TRUE,13472,homes_delivered,10544,4951725,10,217,214,KB Home 2021 10-K net orders and deliveries tables.
+KBH,2022,10856,5620196,net_orders,TRUE,13738,homes_delivered,7662,3691559,26,246,222,KB Home 2022 10-K net orders and deliveries tables.
+KBH,2023,11084,5346541,net_orders,TRUE,13236,homes_delivered,5510,2667679,26,242,245,KB Home 2023 10-K net orders and deliveries tables.
+HOV,2012,,1578969,net_contracts_value_consolidated_homebuilding,FALSE,4676,homes_delivered,1889,632318,,,,Hovnanian 2012 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2013,,1914448,net_contracts_value_consolidated_homebuilding,FALSE,5266,homes_delivered,2167,762439,,,,Hovnanian 2013 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2014,,2106421,net_contracts_value_consolidated_homebuilding,FALSE,5497,homes_delivered,2229,855847,,,,Hovnanian 2014 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2015,,2448207,net_contracts_value_consolidated_homebuilding,FALSE,5507,homes_delivered,2905,1215925,,,,Hovnanian 2015 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2016,,2524010,net_contracts_value_consolidated_homebuilding,FALSE,6464,homes_delivered,2398,1069102,,,,Hovnanian 2016 10-K contemporaneous quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2017,,2084097,net_contracts_value_consolidated_homebuilding,FALSE,5602,homes_delivered,1983,808033,,,,Hovnanian 2017 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2018,,1835213,net_contracts_value_consolidated_homebuilding,FALSE,4847,homes_delivered,1826,745630,,,,Hovnanian 2018 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2019,,2100544,net_contracts_value_consolidated_homebuilding,FALSE,4946,homes_delivered,2191,880144,,,,Hovnanian 2019 10-K quarterly sales-contract table and homes-delivered/backlog tables; annual net-contract units were not found in the same comparable table.
+HOV,2020,,2814460,net_contracts_value_consolidated_homebuilding,FALSE,5686,homes_delivered,3402,,,,,Hovnanian 2020 10-K reports consolidated net contracts in dollars and homes delivered; annual net-contract units were not found in the same comparable table.
+HOV,2021,,2887592,net_contracts_value_consolidated_homebuilding,FALSE,6204,homes_delivered,3247,,,,,Hovnanian 2021 10-K reports consolidated net contracts in dollars and homes delivered; annual net-contract units were not found in the same comparable table.
+HOV,2022,,2470426,net_contracts_value_consolidated_homebuilding,FALSE,5538,homes_delivered,2186,1268679,,,,Hovnanian 2022 10-K reports consolidated net contracts in dollars and homes delivered; annual net-contract units were not found in the same comparable table.
+HOV,2023,,2509134,net_contracts_value_consolidated_homebuilding,FALSE,4878,homes_delivered,1824,1060614,,,,Hovnanian 2023 10-K reports consolidated net contracts in dollars and homes delivered; annual net-contract units were not found in the same comparable table.
+NVR,2012,10954,,net_new_orders,TRUE,9843,settlements,4979,,14.5,,404,NVR 2012 10-K Homebuilding operating table.
+NVR,2013,11800,,net_new_orders,TRUE,11834,settlements,4945,,14.9,,451,NVR 2013 10-K Homebuilding operating table.
+NVR,2014,12389,,net_new_orders,TRUE,11859,settlements,5475,,14.6,,488,NVR 2014 10-K Homebuilding operating table.
+NVR,2015,14080,,net_new_orders,TRUE,13326,settlements,6229,,14.5,,472,NVR 2015 10-K Homebuilding operating table.
+NVR,2016,15583,,net_new_orders,TRUE,14928,settlements,6884,,15.5,,485,NVR 2016 10-K Homebuilding operating table.
+NVR,2017,17608,,net_new_orders,TRUE,15961,settlements,8531,,14,,485,NVR 2017 10-K Homebuilding operating table.
+NVR,2018,18281,,net_new_orders,TRUE,18447,settlements,8365,,14.5,,477,NVR 2018 10-K Homebuilding operating table.
+NVR,2019,19536,,net_new_orders,TRUE,19668,settlements,8233,,14.6,,470,NVR 2019 10-K Homebuilding operating table.
+NVR,2020,23082,,net_new_orders,TRUE,19766,settlements,11549,,14.9,,,NVR 2020 10-K Homebuilding operating table.
+NVR,2021,22721,,net_new_orders,TRUE,21540,settlements,12730,,9.2,,,NVR 2021 10-K Homebuilding operating table.
+NVR,2022,19164,,net_new_orders,TRUE,22732,settlements,9162,,14.2,,,NVR 2022 10-K Homebuilding operating table.
+NVR,2023,21729,,net_new_orders,TRUE,20662,settlements,10229,,12.8,,,NVR 2023 10-K Homebuilding operating table.

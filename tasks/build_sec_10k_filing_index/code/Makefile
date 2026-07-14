@@ -3,7 +3,7 @@ include ../../shell_functions.make
 
 all: ../output/sec_10k_filing_index.csv ../output/sec_10k_benchmark_filings.csv ../output/sec_10k_filing_index_qc.csv
 
-../output/sec_10k_filing_index.csv: build_sec_10k_filing_index.R ../../_lib/homebuilder_pipeline_utils.R ../input/builder_sec_crosswalk.csv ../input/sec_submissions_files.csv | ../output
+../output/sec_10k_filing_index.csv: build_sec_10k_filing_index.R ../../_lib/homebuilder_pipeline_utils.R manual_sec_10k_filing_seeds.csv ../input/builder_sec_crosswalk.csv ../input/sec_submissions_files.csv | ../output
 	$(R) $<
 
 ../output/sec_10k_benchmark_filings.csv: ../output/sec_10k_filing_index.csv

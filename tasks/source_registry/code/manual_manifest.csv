@@ -1,1 +1,2 @@
 source_id,expected_filename,download_instructions,login_required,date_placed,checksum_sha256,notes
+builder_universe_roster,builder_universe_roster.csv,Placed manually from the user-provided Fable/Claude roster CSV into data_raw/builder_universe_roster/.,FALSE,2026-07-08,8f5daa1955aa17a0e0799e27795f75b2581899818434b904a38e6fc47588db15,Manual expansion roster for the public-builder universe. Update this file and checksum if the supplied roster changes.

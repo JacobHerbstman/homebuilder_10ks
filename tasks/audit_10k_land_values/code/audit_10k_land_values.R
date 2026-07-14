@@ -10,14 +10,6 @@ suppressPackageStartupMessages({
 
 source("../../_lib/homebuilder_pipeline_utils.R")
 
-as_task_bool <- function(x) {
-  x %in% c(TRUE, "TRUE", "true", "True", "1", 1)
-}
-
-as_task_num <- function(x) {
-  suppressWarnings(as.numeric(as.character(x)))
-}
-
 quantile_or_na <- function(x, p) {
   x <- x[!is.na(x)]
   if (length(x) == 0) {
@@ -68,9 +60,9 @@ preferred_values <- read_csv("../input/tenk_land_preferred_values.csv", show_col
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
     fiscal_year = suppressWarnings(as.integer(fiscal_year)),
-    preferred_value = as_task_num(preferred_value),
+    preferred_value = suppressWarnings(as.numeric(as.character(preferred_value))),
     period_label = suppressWarnings(as.integer(period_label)),
-    selection_score = as_task_num(selection_score),
+    selection_score = suppressWarnings(as.numeric(as.character(selection_score))),
     confidence = coalesce(confidence, ""),
     extraction_method = coalesce(extraction_method, ""),
     source_scope = coalesce(source_scope, ""),
@@ -92,9 +84,9 @@ selection_audit <- read_csv(
     accession_number = as.character(accession_number),
     fiscal_year = suppressWarnings(as.integer(fiscal_year)),
     variable_name = as.character(variable_name),
-    selected_as_preferred = as_task_bool(selected_as_preferred),
-    conflicting_high_score_values = as_task_bool(conflicting_high_score_values),
-    numeric_value = as_task_num(numeric_value)
+    selected_as_preferred = selected_as_preferred %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    conflicting_high_score_values = conflicting_high_score_values %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    numeric_value = suppressWarnings(as.numeric(as.character(numeric_value)))
   )
 
 panel <- read_csv("../input/public_builder_10k_land_panel.csv", show_col_types = FALSE, na = c("", "NA")) |>
@@ -105,7 +97,7 @@ panel <- read_csv("../input/public_builder_10k_land_panel.csv", show_col_types =
   )
 
 benchmark_audit <- read_csv("../input/tenk_land_benchmark_audit.csv", show_col_types = FALSE, na = c("", "NA")) |>
-  mutate(benchmark_pass = as_task_bool(benchmark_pass))
+  mutate(benchmark_pass = benchmark_pass %in% c(TRUE, "TRUE", "true", "True", "1", 1))
 
 selected_conflicts <- selection_audit |>
   filter(selected_as_preferred) |>

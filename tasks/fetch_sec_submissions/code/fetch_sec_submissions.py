@@ -54,7 +54,8 @@ def main():
             "checksum_sha256": sha256(main_path),
             "error": result["error"],
         })
-        time.sleep(delay_seconds)
+        if result["status"] != "already_present":
+            time.sleep(delay_seconds)
 
         if result["status"] not in {"downloaded", "already_present"} or not main_path.exists():
             continue
@@ -88,7 +89,8 @@ def main():
                 "checksum_sha256": sha256(older_path),
                 "error": older_result["error"],
             })
-            time.sleep(delay_seconds)
+            if older_result["status"] != "already_present":
+                time.sleep(delay_seconds)
 
     failures = [row for row in rows if row["status"] not in {"downloaded", "already_present"}]
     if not failures:

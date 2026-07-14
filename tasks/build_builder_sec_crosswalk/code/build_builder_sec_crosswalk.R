@@ -16,34 +16,6 @@ format_cik10 <- function(x) {
   if_else(is.na(raw_value), NA_character_, str_pad(raw_value, 10, pad = "0"))
 }
 
-parse_sec_ticker_map <- function() {
-  file_inventory <- read_csv("../input/sec_company_tickers_files.csv", show_col_types = FALSE, na = c("", "NA")) |>
-    filter(status %in% c("downloaded", "already_present"), file.exists(source_local_path)) |>
-    arrange(desc(pull_date))
-
-  if (nrow(file_inventory) == 0) {
-    return(tibble(
-      sec_ticker = character(),
-      sec_cik = character(),
-      sec_cik10 = character(),
-      sec_title = character(),
-      sec_title_key = character()
-    ))
-  }
-
-  raw_json <- fromJSON(file_inventory$source_local_path[[1]], simplifyVector = FALSE)
-  bind_rows(lapply(raw_json, function(row) {
-    tibble(
-      sec_ticker = str_to_upper(as.character(if (is.null(row$ticker)) NA_character_ else row$ticker)),
-      sec_cik = as.character(if (is.null(row$cik_str)) NA_character_ else row$cik_str),
-      sec_cik10 = format_cik10(if (is.null(row$cik_str)) NA_character_ else row$cik_str),
-      sec_title = as.character(if (is.null(row$title)) NA_character_ else row$title),
-      sec_title_key = normalize_text_key(if (is.null(row$title)) NA_character_ else row$title)
-    )
-  })) |>
-    distinct(sec_ticker, .keep_all = TRUE)
-}
-
 builder_public <- read_csv("../input/builder_public_firm_roster.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(builder_name_key = as.character(builder_name_key))
 
@@ -67,14 +39,47 @@ manual_crosswalk <- read_csv("manual_builder_sec_crosswalk.csv", show_col_types 
     manual_review_indicator_seed, manual_valid_from_year, manual_valid_to_year, manual_notes
   )
 
-if (nrow(manual_crosswalk) != n_distinct(manual_crosswalk$builder_name_key)) {
-  stop("manual_builder_sec_crosswalk.csv must be unique by builder_name_key.")
+if (nrow(manual_crosswalk) != nrow(distinct(manual_crosswalk))) {
+  stop("manual_builder_sec_crosswalk.csv contains exact duplicate rows.")
 }
 
-sec_tickers <- parse_sec_ticker_map()
+manual_crosswalk_duplicate_check <- manual_crosswalk |>
+  mutate(manual_cik10_for_check = coalesce(manual_cik10, paste0("missing_cik_", row_number()))) |>
+  count(builder_name_key, manual_cik10_for_check, name = "rows") |>
+  filter(rows > 1)
+
+if (nrow(manual_crosswalk_duplicate_check) > 0) {
+  stop("manual_builder_sec_crosswalk.csv must be unique by builder_name_key and CIK episode.")
+}
+
+file_inventory <- read_csv("../input/sec_company_tickers_files.csv", show_col_types = FALSE, na = c("", "NA")) |>
+  filter(status %in% c("downloaded", "already_present"), file.exists(source_local_path)) |>
+  arrange(desc(pull_date))
+
+if (nrow(file_inventory) == 0) {
+  sec_tickers <- tibble(
+    sec_ticker = character(),
+    sec_cik = character(),
+    sec_cik10 = character(),
+    sec_title = character(),
+    sec_title_key = character()
+  )
+} else {
+  raw_json <- fromJSON(file_inventory$source_local_path[[1]], simplifyVector = FALSE)
+  sec_tickers <- bind_rows(lapply(raw_json, function(row) {
+    tibble(
+      sec_ticker = str_to_upper(as.character(if (is.null(row$ticker)) NA_character_ else row$ticker)),
+      sec_cik = as.character(if (is.null(row$cik_str)) NA_character_ else row$cik_str),
+      sec_cik10 = format_cik10(if (is.null(row$cik_str)) NA_character_ else row$cik_str),
+      sec_title = as.character(if (is.null(row$title)) NA_character_ else row$title),
+      sec_title_key = normalize_text_key(if (is.null(row$title)) NA_character_ else row$title)
+    )
+  })) |>
+    distinct(sec_ticker, .keep_all = TRUE)
+}
 
 crosswalk <- builder_public |>
-  left_join(manual_crosswalk, by = "builder_name_key", relationship = "one-to-one") |>
+  left_join(manual_crosswalk, by = "builder_name_key", relationship = "one-to-many") |>
   left_join(sec_tickers, by = c("manual_ticker" = "sec_ticker"), relationship = "many-to-one") |>
   mutate(
     ticker = manual_ticker,
@@ -96,9 +101,15 @@ crosswalk <- builder_public |>
     manual_review_indicator = coalesce(manual_review_indicator_seed, FALSE) | is.na(cik10) | public_parent_no_comparable_us_10k,
     valid_from_year = manual_valid_from_year,
     valid_to_year = manual_valid_to_year,
+    crosswalk_episode_id = if_else(
+      is.na(cik10),
+      builder_name_key,
+      paste(builder_name_key, cik10, sep = "__")
+    ),
     notes = manual_notes
   ) |>
   transmute(
+    crosswalk_episode_id,
     builder_name_key,
     builder_name_clean,
     builder_names_observed,
@@ -153,6 +164,7 @@ unmatched <- crosswalk |>
 qc_rows <- tibble(
   check = c(
     "builder_public_firms",
+    "builder_sec_crosswalk_rows",
     "sec_reporting_cik_known",
     "manual_review_rows",
     "unmatched_no_cik",
@@ -167,7 +179,8 @@ qc_rows <- tibble(
     "current_seed_bzh"
   ),
   status = c(
-    if_else(nrow(crosswalk) == 53, "ok", "warn"),
+    if_else(n_distinct(crosswalk$builder_name_key) == 53, "ok", "warn"),
+    if_else(nrow(crosswalk) >= n_distinct(crosswalk$builder_name_key), "ok", "fail"),
     if_else(sum(!is.na(crosswalk$cik10) & crosswalk$sec_reporting_indicator) > 0, "ok", "fail"),
     "ok",
     if_else(sum(is.na(crosswalk$cik10)) == 0, "ok", "warn"),
@@ -182,6 +195,7 @@ qc_rows <- tibble(
     if_else(any(crosswalk$ticker == "BZH" & crosswalk$cik10 == "0000915840"), "ok", "fail")
   ),
   value = c(
+    n_distinct(crosswalk$builder_name_key),
     nrow(crosswalk),
     sum(!is.na(crosswalk$cik10) & crosswalk$sec_reporting_indicator),
     sum(crosswalk$manual_review_indicator, na.rm = TRUE),
@@ -190,6 +204,7 @@ qc_rows <- tibble(
   ),
   detail = c(
     "Expected 53 from the current Builder public roster.",
+    "Rows can exceed Builder-public firms when one Builder label maps to multiple SEC registrant episodes.",
     "Rows with known CIK and SEC-reporting indicator.",
     "Rows retained for manual review or comparability review.",
     "Rows with no CIK after manual seeds and ticker map.",

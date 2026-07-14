@@ -1,0 +1,37 @@
+company,ticker,tier,status,filing_window,fye_month,fate_and_splicing_notes,omega_prior_and_relevance
+D.R. Horton,DHI,1,active,1992-present,Sep,Acquired Continental Homes 1998; Schuler Homes 2002; majority stake in Forestar 2017,Pilot firm; entry-level; high and rising omega; spec-heavy (WIP buffer)
+Lennar,LEN,1,active,1990s-present,Nov,Acquired US Home 2000; WCI 2017; CalAtlantic 2018; spun Millrose Feb 2025,Pilot firm; omega ~95% post-Millrose; conversion event inside sample
+PulteGroup,PHM,1,active,1990s-present,Dec,Acquired Del Webb 2001; Centex 2009,Pilot firm; mid omega; active-adult mix
+NVR,NVR,1,active,1993-present,Dec,Post-1992-bankruptcy pure-option model,Pilot firm; omega ~1 always; the always-treated placebo firm
+KB Home,KBH,1,active,1990s-present,Nov,Renamed from Kaufman & Broad 2001; acquired lots of CA exposure,Pilot firm; low-mid omega; rate-sensitive West Coast entry level
+Hovnanian,HOV,1,active,1990s-present,Oct,Acquired Washington Homes 2001,Pilot firm; distressed-leverage case; high omega now
+Toll Brothers,TOL,1,active,1990s-present,Oct,Self-entitles luxury land; long-duration positions,LOW-OMEGA ANCHOR; luxury; owns and entitles its own land
+Meritage Homes,MTH,1,active,1997-present,Dec,Formerly Monterey Homes; pivoted to entry-level spec ~2016,Mid omega rising; useful strategy-switch case
+M/I Homes,MHO,1,active,1993-present,Dec,Midwest/Southeast footprint,Mid omega; long clean history
+Beazer Homes,BZH,1,active,1994-present,Sep,Acquired Crossmann 2002; near-death 2008-2011,High leverage constrains land buying; slow converter
+M.D.C. Holdings,MDC,1,delisted,1980s-Apr 2024,Dec,Acquired by Sekisui House Apr 2024; filings usable through 2023,Build-to-order; famously conservative ~2yr land supply; low-spec
+Taylor Morrison,TMHC,1,active,Apr 2013-present,Dec,IPO 2013 (ex-Taylor Wimpey NA); acquired AV Homes 2018; William Lyon 2020,Mid omega rising; big acquirer (splice map needed)
+Tri Pointe Homes,TPH,1,active,Jan 2013-present,Dec,IPO 2013; acquired Weyerhaeuser Real Estate (WRECO) 2014,Mid omega; West Coast move-up
+Century Communities,CCS,1,active,Jun 2014-present,Dec,IPO 2014; acquired UCP 2017,Entry-level; rising omega
+LGI Homes,LGIH,1,active,Nov 2013-present,Dec,IPO 2013,LOW-OMEGA ANCHOR; owns most lots; 100% spec; systemized machine
+Green Brick Partners,GRBK,1,active,2014-present,Dec,Reverse merger into BioFuel Energy shell 2014,LOW-OMEGA ANCHOR; deliberate land-ownership strategy; owns ~75%+
+Dream Finders Homes,DFH,1,active,Jan 2021-present,Dec,IPO 2021,Pure land-light; ~100% optioned; recent-IPO cohort
+Smith Douglas Homes,SDHC,1,active,Jan 2024-present,Dec,IPO 2024,Pure land-light; ~96% optioned; near-zero debt; recent-IPO cohort
+United Homes Group,UHG,1,active,Mar 2023-present,Dec,de-SPAC 2023 (Great Southern Homes),Land-light model; recent-IPO cohort
+Landsea Homes,LSEA,1,delisted,Jan 2021-Q3 2025,Dec,de-SPAC 2021; taken private by New Home Co./Apollo Q3 2025 (Millrose financed land banking),Filings 2021-2025 usable; asset-light strategy
+Centex,CTX,2,acquired,1990s-2009,MARCH,Acquired by Pulte Aug 2009. WARNING: fiscal year ends March 31,Was a top-3 builder; land-heavy; bust casualty via merger
+Ryland Group,RYL,2,merged,1980s-2015,Dec,Merged with Standard Pacific into CalAtlantic Oct 2015,Mid-size national; full boom-bust cycle coverage
+Standard Pacific,SPF,2,merged,1991-2015,Dec,Merged into CalAtlantic 2015,CA-heavy; near-death 2008-2009; land-heavy bust case
+CalAtlantic,CAA,2,acquired,Oct 2015-Feb 2018,Dec,Acquired by Lennar Feb 2018,Short window; splice RYL+SPF into it then into LEN
+TOUSA (Technical Olympic USA),TOA,2,bankrupt,1990s-2008,Dec,Chapter 11 Jan 2008; acquired Engle Homes 2000,KEY bust observation; land/JV-heavy; leverage on land
+WCI Communities,WCI/WCIC,2,bankrupt,1990s-2008 and 2015-2017,Dec,Ch.11 Aug 2008; re-IPO 2015 as WCIC; acquired by Lennar Feb 2017,KEY bust observation; FL luxury/tower; land-heavy
+Orleans Homebuilders,OHB,2,bankrupt,1990s-2010,Jun,Chapter 11 Mar 2010. Check FYE (June),Mid-Atlantic; bust casualty
+Dominion Homes,DHOM,2,delisted,1990s-2008,Dec,Taken private 2008 amid distress,Ohio entry-level; bust casualty
+William Lyon Homes,WLH,2,acquired,1999-2006 and May 2013-Feb 2020,Dec,Taken private 2006; re-IPO 2013; acquired by Taylor Morrison Feb 2020,Two public windows; CA-heavy
+AV Homes,AVHI,2,acquired,1990s-Oct 2018,Dec,Formerly Avatar Holdings; acquired by Taylor Morrison 2018,FL/AZ; active-adult
+UCP Inc,UCP,2,acquired,Jul 2013-Aug 2017,Dec,Acquired by Century Communities 2017,CA land developer-builder hybrid; interesting omega structure
+New Home Company,NWHM,2,delisted,Jan 2014-Oct 2021,Dec,Taken private by Apollo Oct 2021; later acquired Landsea 2025,CA luxury; asset-light pivot late in window
+Brookfield Homes / Brookfield Residential,BHS/BRP,2,delisted,2003-Mar 2015,Dec,BHS 2003-2011 then BRP 2011-2015; taken private by Brookfield 2015,CA/Canada; land development heavy
+Comstock Homebuilding,CHCI,2,pivoted,Dec 2004-2018,Dec,Exited homebuilding ~2015-2018; now asset mgmt,Marginal; DC-area small cap; include only if cheap
+Forestar Group,FOR,3,active,2007-present,Sep post-DHI,Spun from Temple-Inland 2007; DHI majority stake 2017; FYE aligned to DHI (Sep),NOT a builder: the public land developer; lot delivery schedules; takedown lags
+Millrose Properties,MRP,3,active,Feb 2025-present,Dec,Spun from Lennar Feb 2025 as land-banking REIT,NOT a builder: pure land banker; option yields; financed New Home/Landsea deal

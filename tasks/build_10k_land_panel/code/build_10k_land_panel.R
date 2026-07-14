@@ -10,18 +10,6 @@ suppressPackageStartupMessages({
 
 source("../../_lib/homebuilder_pipeline_utils.R")
 
-as_task_int <- function(x) {
-  suppressWarnings(as.integer(as.character(x)))
-}
-
-as_task_num <- function(x) {
-  suppressWarnings(as.numeric(as.character(x)))
-}
-
-as_task_bool <- function(x) {
-  x %in% c(TRUE, "TRUE", "true", "True", "1", 1)
-}
-
 preferred_metric_names <- c(
   "owned_lots", "optioned_lots", "controlled_lots", "total_lots",
   "owned_homesites", "controlled_homesites", "total_homesites",
@@ -65,11 +53,11 @@ candidates <- read_csv("../input/tenk_land_candidates.csv", show_col_types = FAL
   mutate(
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
-    fiscal_year = as_task_int(fiscal_year),
-    numeric_value = as_task_num(numeric_value),
-    candidate_score = as_task_num(candidate_score),
-    statement_scale_factor = as_task_num(statement_scale_factor),
-    period_year = as_task_int(str_extract(as.character(period_label), "(19|20)\\d{2}")),
+    fiscal_year = suppressWarnings(as.integer(as.character(fiscal_year))),
+    numeric_value = suppressWarnings(as.numeric(as.character(numeric_value))),
+    candidate_score = suppressWarnings(as.numeric(as.character(candidate_score))),
+    statement_scale_factor = suppressWarnings(as.numeric(as.character(statement_scale_factor))),
+    period_year = suppressWarnings(as.integer(str_extract(as.character(period_label), "(19|20)\\d{2}"))),
     candidate_score = coalesce(candidate_score, 0),
     source_scope = coalesce(source_scope, ""),
     table_scale_label = coalesce(table_scale_label, ""),
@@ -153,7 +141,7 @@ download_inventory <- read_csv("../input/sec_10k_download_inventory.csv", show_c
   mutate(
     cik10 = as.character(cik10),
     accession_number = as.character(accession_number),
-    fiscal_year = as_task_int(fiscal_year),
+    fiscal_year = suppressWarnings(as.integer(as.character(fiscal_year))),
     report_date = suppressWarnings(as.Date(report_date)),
     filing_date = suppressWarnings(as.Date(filing_date))
   ) |>
@@ -169,9 +157,9 @@ if (download_inventory |>
 builder_firm_years <- read_csv("../input/builder_public_firm_year_identifiers.csv", show_col_types = FALSE, na = c("", "NA")) |>
   mutate(
     cik10 = as.character(cik10),
-    builder_activity_year = as_task_int(builder_activity_year),
-    standalone_sec_panel_eligible = as_task_bool(standalone_sec_panel_eligible),
-    firm_year_manual_review_indicator = as_task_bool(firm_year_manual_review_indicator)
+    builder_activity_year = suppressWarnings(as.integer(as.character(builder_activity_year))),
+    standalone_sec_panel_eligible = standalone_sec_panel_eligible %in% c(TRUE, "TRUE", "true", "True", "1", 1),
+    firm_year_manual_review_indicator = firm_year_manual_review_indicator %in% c(TRUE, "TRUE", "true", "True", "1", 1)
   ) |>
   select(
     builder_name_key, cik10, builder_activity_year, harmonized_builder_id,

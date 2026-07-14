@@ -1,5 +1,17 @@
 # Homebuilder 10-Ks Project Guidelines
 
+## Code Quality Standard
+- Working code is not enough. In this repo, clarity, traceability, and simplicity are part of correctness.
+- A reader should be able to start from a final paper/report output or processed dataset, follow concrete Makefile prerequisites backward through the pipeline, and understand how each table, figure, dataset, or audit is produced without hidden defaults, orchestration scripts, side outputs, or exploratory clutter.
+- Prefer boring, linear, explicit code over clever abstractions.
+- The Makefile dependency graph is the source of truth. Final documents, figures, tables, and processed datasets should depend on task outputs through Make, not manual copying.
+- Expose real analytical choices as scalar Make variables: years, samples, outcomes, cutoffs, thresholds, fixed effects, controls, clustering, and similar specification choices.
+- Fixed task-local file paths belong directly in scripts at the read/write call site, not as command-line arguments.
+- Active scripts should run top-to-bottom from the task `code/` folder.
+- Production tasks should produce the primary output they exist to produce. Put audits, diagnostics, QC files, logs, manifests, exploratory tables, and diagnostic plots in dedicated audit tasks unless they are actual final outputs.
+- Keep output filenames stable, informative, and tied to real specifications. Do not rename outputs casually.
+- Before committing a meaningful change, run `make` from each changed task's `code/` folder, confirm incrementality with `make -n`, run `git diff --check`, review the diff for scope, and commit with a short literal message.
+
 ## Data Analysis workflow
 - This project uses a task-based workflow. Every task in the paper has a dedicated folder in `tasks/` with its own `code/`, `input/`, and `output/` subfolders.
 - Each task should have its own makefile. Each makefile should be as clean and simple as possible to make them readable.
@@ -100,7 +112,8 @@
 ## Linear Active Script Standard
 - For non-archived active tasks, prefer scripts that run top-to-bottom in a linear, readable sequence once the user is in the task `code/` folder.
 - Inline one-off cleaning, merge, transformation, modeling, and export steps instead of wrapping them in local helper functions.
-- Use functions in active scripts only when logic is clearly reused within that same script and duplication would materially hurt readability.
+- Use functions in active scripts only when logic is clearly reused within that same script and duplication would materially hurt readability. Do not put one-off convenience helpers at the top of a task script just to name one line of code.
+- Prefer direct verbs in the pipeline (`mutate()`, `summarise()`, `bind_rows()`, explicit loops for irregular files) over predeclared helper functions when the transformation is only used once.
 - Do not leave the main active script as a thin wrapper around one large helper pipeline.
 - Put genuinely reusable cross-task helpers in `tasks/_lib`.
 - Allow a task-family helper file only when multiple active sibling scripts share substantial logic and moving it to `tasks/_lib` would be less clear.
