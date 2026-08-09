@@ -1,5 +1,5 @@
 SHELL := bash
-include ../../shell_functions.make
+R := Rscript
 
 all: ../output/builder_public_universe_reconciliation.csv ../output/land_gap_retrieval_audit.csv ../output/operating_measure_readiness.csv ../output/expanded_builder_sample_audit_qc.csv
 
@@ -27,7 +27,7 @@ all: ../output/builder_public_universe_reconciliation.csv ../output/land_gap_ret
 ../input/expanded_builder_2004_2025_land_panel.csv: ../../build_expanded_builder_land_panel/output/expanded_builder_2004_2025_land_panel.csv | ../input
 	@test "$$(readlink "$@")" = "$<" || ln -sf "$<" "$@"
 
-../input/expanded_builder_land_gap_audit.csv: ../../build_expanded_builder_land_panel/output/expanded_builder_land_gap_audit.csv | ../input
+../input/expanded_builder_land_gap_audit.csv: ../../audits/audit_expanded_builder_land_panel/output/expanded_builder_land_gap_audit.csv | ../input
 	@test "$$(readlink "$@")" = "$<" || ln -sf "$<" "$@"
 
 ../input/tenk_land_preferred_values.csv: ../../build_10k_land_panel/output/tenk_land_preferred_values.csv | ../input

@@ -1,5 +1,5 @@
 SHELL := bash
-include ../../shell_functions.make
+R := Rscript
 
 all: ../output/builder_sec_crosswalk.csv ../output/builder_sec_match_candidates.csv ../output/builder_sec_unmatched_public_firms.csv ../output/builder_sec_crosswalk_qc.csv
 

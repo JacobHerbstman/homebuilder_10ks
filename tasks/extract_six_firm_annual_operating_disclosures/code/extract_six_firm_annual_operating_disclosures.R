@@ -5,7 +5,6 @@ suppressPackageStartupMessages({
   library(readr)
   library(rvest)
   library(stringr)
-  library(tidyr)
 })
 
 source("../../_lib/homebuilder_pipeline_utils.R")
@@ -511,7 +510,7 @@ for (i in seq_len(nrow(inventory))) {
       cancellation_rate_pct <- parse_number(str_match(detail_text, regex("Cancellation rate[^0-9]*([0-9.]+)\\s*%", ignore_case = TRUE))[, 2])
       if (is.na(backlog_units)) backlog_units <- parse_number(str_match(detail_text, regex("Ending backlog[^—-]*[—-] homes\\s*([0-9,]+)", ignore_case = TRUE))[, 2])
       backlog_value_thousands <- parse_number(str_match(detail_text, regex("Ending backlog[^—-]*[—-] value\\s*\\$?\\s*([0-9,]+)", ignore_case = TRUE))[, 2])
-      active_communities <- parse_number(str_match(detail_text, regex("Ending community count\\s*([0-9,]+)", ignore_case = TRUE))[, 2])
+      if (is.na(active_communities)) active_communities <- parse_number(str_match(detail_text, regex("Ending community count\\s*([0-9,]+)", ignore_case = TRUE))[, 2])
       if (is.na(average_community_count)) average_community_count <- parse_number(str_match(detail_text, regex("Average community count\\s*([0-9,]+)", ignore_case = TRUE))[, 2])
       orders_source_table_text <- detail_text
       backlog_source_table_text <- detail_text
@@ -865,123 +864,34 @@ operating_panel <- candidates |>
     source_checksum_sha256
   )
 
-benchmarks <- read_csv(
-  "../input/manual_six_firm_operating_scale_2012_2023.csv",
-  show_col_types = FALSE,
-  na = c("", "NA")
-) |>
-  select(
-    ticker,
-    fiscal_year,
-    orders_units,
-    orders_value_thousands,
-    deliveries_units,
-    backlog_units,
-    backlog_value_thousands,
-    cancellation_rate_pct,
-    active_communities,
-    average_community_count
-  ) |>
-  pivot_longer(
-    -c(ticker, fiscal_year),
-    names_to = "metric_name",
-    values_to = "expected_value"
-  ) |>
-  filter(!is.na(expected_value))
-
-benchmark_audit <- benchmarks |>
-  left_join(
-    operating_panel |>
-      select(
-        ticker,
-        fiscal_year,
-        orders_units,
-        orders_value_thousands,
-        deliveries_units,
-        backlog_units,
-        backlog_value_thousands,
-        cancellation_rate_pct,
-        active_communities,
-        average_community_count,
-        accession_number,
-        extraction_method,
-        extraction_confidence
-      ) |>
-      pivot_longer(
-        cols = c(
-          orders_units,
-          orders_value_thousands,
-          deliveries_units,
-          backlog_units,
-          backlog_value_thousands,
-          cancellation_rate_pct,
-          active_communities,
-          average_community_count
-        ),
-        names_to = "metric_name",
-        values_to = "extracted_value"
-      ),
-    by = c("ticker", "fiscal_year", "metric_name"),
-    relationship = "one-to-one"
-  ) |>
-  mutate(
-    tolerance = if_else(metric_name == "cancellation_rate_pct", 0.05, 0),
-    absolute_difference = abs(extracted_value - expected_value),
-    status = if_else(!is.na(extracted_value) & absolute_difference <= tolerance, "pass", "fail")
-  ) |>
-  arrange(ticker, fiscal_year, metric_name)
-
-if (any(benchmark_audit$status != "pass")) {
-  print(benchmark_audit |> filter(status != "pass"))
-  stop("At least one manually audited six-firm operating benchmark failed.")
+if (nrow(operating_panel) != 120L || operating_panel |> count(ticker, fiscal_year) |> filter(n != 1L) |> nrow() > 0L) {
+  stop("Six-firm annual operating panel is not unique and complete for 2006-2025.")
 }
 
-implausible_values <- operating_panel |>
-  filter(
-    if_any(c(orders_units, deliveries_units, backlog_units), ~ !is.na(.x) & (.x <= 0 | .x > 200000)) |
-      (!is.na(cancellation_rate_pct) & (cancellation_rate_pct < 0 | cancellation_rate_pct > 100)) |
-      (!is.na(average_selling_price_dollars) & (average_selling_price_dollars < 50000 | average_selling_price_dollars > 2000000))
-  )
-
-if (nrow(implausible_values) > 0) {
-  print(implausible_values |> select(ticker, fiscal_year, orders_units, deliveries_units, backlog_units, cancellation_rate_pct, average_selling_price_dollars))
-  stop("At least one extracted operating value failed the magnitude audit.")
+if (operating_panel |>
+    filter(
+      is.na(deliveries_units) |
+        is.na(backlog_units) |
+        (ticker == "HOV" & fiscal_year < 2018L & is.na(orders_value_thousands)) |
+        (is.na(orders_units) & (ticker != "HOV" | fiscal_year >= 2018L))
+    ) |>
+    nrow() > 0L) {
+  stop("Six-firm annual operating panel has a missing core operating value.")
 }
 
-missing_core_values <- operating_panel |>
-  filter(
-    is.na(deliveries_units) |
-      is.na(backlog_units) |
-      (ticker == "HOV" & fiscal_year < 2018 & is.na(orders_value_thousands)) |
-      (is.na(orders_units) & (ticker != "HOV" | fiscal_year >= 2018))
-  )
-
-if (nrow(missing_core_values) > 0) {
-  print(missing_core_values |> select(ticker, fiscal_year, orders_units, orders_value_thousands, deliveries_units, backlog_units))
-  stop("At least one required six-firm annual operating measure is missing.")
+if (operating_panel |>
+    filter(
+      if_any(c(orders_units, deliveries_units, backlog_units), ~ !is.na(.x) & (.x <= 0 | .x > 200000)) |
+        (!is.na(cancellation_rate_pct) & (cancellation_rate_pct < 0 | cancellation_rate_pct > 100)) |
+        (!is.na(active_communities) & (active_communities <= 0 | active_communities > 5000)) |
+        (!is.na(average_community_count) & (average_community_count <= 0 | average_community_count > 5000)) |
+        (!is.na(average_selling_price_dollars) & (average_selling_price_dollars < 50000 | average_selling_price_dollars > 2000000))
+    ) |>
+    nrow() > 0L) {
+  stop("Six-firm annual operating panel has an implausible value.")
 }
-
-coverage_audit <- operating_panel |>
-  group_by(ticker, company) |>
-  summarise(
-    filing_years = n(),
-    first_year = min(fiscal_year),
-    last_year = max(fiscal_year),
-    orders_units_years = sum(!is.na(orders_units)),
-    orders_value_years = sum(!is.na(orders_value_thousands)),
-    deliveries_years = sum(!is.na(deliveries_units)),
-    backlog_units_years = sum(!is.na(backlog_units)),
-    backlog_value_years = sum(!is.na(backlog_value_thousands)),
-    cancellation_rate_years = sum(!is.na(cancellation_rate_pct)),
-    active_community_years = sum(!is.na(active_communities) | !is.na(average_community_count)),
-    manual_review_years = sum(manual_review_flag),
-    .groups = "drop"
-  ) |>
-  arrange(ticker)
 
 write_csv_if_changed(operating_panel, "../output/six_firm_2006_2025_operating_panel.csv")
 write_csv_if_changed(candidates, "../output/six_firm_2006_2025_operating_candidates.csv")
-write_csv_if_changed(benchmark_audit, "../output/six_firm_2012_2023_operating_benchmark_audit.csv")
-write_csv_if_changed(coverage_audit, "../output/six_firm_2006_2025_operating_coverage_audit.csv")
 
-cat("Wrote six-firm annual operating disclosure outputs to ../output\n")
+cat("Wrote six-firm annual operating panel and candidates to ../output\n")

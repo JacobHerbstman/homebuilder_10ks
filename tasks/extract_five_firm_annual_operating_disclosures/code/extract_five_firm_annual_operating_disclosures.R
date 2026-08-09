@@ -250,7 +250,7 @@ for (i in seq_len(nrow(inventory))) {
     if (length(cancellation_index) >= 1) {
       cancellation_match <- str_match(
         table_text[cancellation_index[1]],
-        regex("Total\\s+[0-9,]+.*?([0-9.]+)\\s*%", ignore_case = TRUE)
+        regex("Total\\s+[0-9,]+\\s+[0-9,]+\\s+[0-9,]+\\s+\\(?[0-9.]+\\s*\\)?\\s*%\\s+\\(?[0-9.]+\\s*\\)?\\s*%\\s+([0-9.]+)\\s*%", ignore_case = TRUE)
       )
       cancellation_rate_pct <- parse_number(cancellation_match[, 2])
     }
@@ -436,6 +436,10 @@ panel <- bind_rows(rows) |>
 
 if (nrow(panel) != 99 || panel |> count(ticker, fiscal_year) |> filter(n != 1) |> nrow() > 0) {
   stop("Annual operating panel is not unique and complete by target firm-year.")
+}
+
+if (panel |> filter(is.na(orders_units) | is.na(deliveries_units) | is.na(backlog_units)) |> nrow() > 0) {
+  stop("Five-firm annual operating panel has a missing core operating count.")
 }
 
 write_csv_if_changed(panel, "../output/five_firm_2006_2025_annual_operating_panel.csv")

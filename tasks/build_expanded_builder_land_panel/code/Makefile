@@ -1,24 +1,12 @@
 SHELL := bash
-include ../../shell_functions.make
+R := Rscript
 
-all: ../output/expanded_builder_2004_2025_land_panel.csv ../output/expanded_builder_land_coverage_by_firm.csv ../output/expanded_builder_land_coverage_by_year.csv ../output/expanded_builder_land_plot_data.csv ../output/expanded_builder_land_review_queue.csv ../output/expanded_builder_land_gap_audit.csv
+all: ../output/expanded_builder_2004_2025_land_panel.csv ../output/expanded_builder_land_plot_data.csv
 
 ../output/expanded_builder_2004_2025_land_panel.csv: build_expanded_builder_land_panel.R ../../_lib/homebuilder_pipeline_utils.R ../input/builder_universe_sec_crosswalk.csv ../input/land_light_firm_year_measures.csv ../input/six_firm_2006_2025_manual_land_panel.csv ../input/tol_2004_2025_land_panel.csv ../input/mho_2004_2025_land_panel.csv ../input/mdc_2004_2025_land_panel.csv ../input/grbk_2014_2025_land_panel.csv ../input/grbk_prebuilder_filing_exclusions.csv ../input/mth_2004_2025_land_panel.csv ../input/tmhc_2013_2025_land_panel.csv ../input/tph_2012_2025_land_panel.csv ../input/nvr_2004_2009_early_land_panel.csv ../input/lsea_2020_2024_land_panel.csv ../input/lsea_2018_2019_prebuilder_filing_exclusions.csv ../input/dfh_2020_2025_land_panel.csv ../input/sdhc_2022_2025_land_panel.csv ../input/uhg_2022_2025_land_panel.csv ../input/uhg_2020_2021_prebuilder_filing_exclusions.csv ../input/tier1_early_2004_2005_land_panel.csv ../input/ctx_2004_2009_land_panel.csv ../input/toa_2004_2007_land_panel.csv ../input/ohb_2004_2008_land_panel.csv ../input/ucp_2013_2016_land_panel.csv ../input/dhom_2004_2007_land_panel.csv ../input/bhs_2004_2010_land_panel.csv ../input/wci_2004_2015_land_panel.csv ../input/nwhm_2013_2020_land_panel.csv ../input/ryl_2004_2014_land_panel.csv ../input/avhi_2004_2017_land_panel.csv ../input/wlh_2004_2018_land_panel.csv ../input/spf_caa_2004_2016_land_panel.csv ../input/chci_2006_2016_land_panel.csv ../input/lev_2004_2007_land_panel.csv | ../output
 	$(R) $<
 
-../output/expanded_builder_land_coverage_by_firm.csv: ../output/expanded_builder_2004_2025_land_panel.csv
-	@test -s "$@"
-
-../output/expanded_builder_land_coverage_by_year.csv: ../output/expanded_builder_2004_2025_land_panel.csv
-	@test -s "$@"
-
 ../output/expanded_builder_land_plot_data.csv: ../output/expanded_builder_2004_2025_land_panel.csv
-	@test -s "$@"
-
-../output/expanded_builder_land_review_queue.csv: ../output/expanded_builder_2004_2025_land_panel.csv
-	@test -s "$@"
-
-../output/expanded_builder_land_gap_audit.csv: ../output/expanded_builder_2004_2025_land_panel.csv
 	@test -s "$@"
 
 ../input/builder_universe_sec_crosswalk.csv: ../../stage_builder_universe_roster/output/builder_universe_sec_crosswalk.csv | ../input

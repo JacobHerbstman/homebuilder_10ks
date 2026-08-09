@@ -8,14 +8,13 @@ the generic extraction candidates as final values. The generic extraction is
 useful for search and triage, but the pilot panel uses hand-read values with
 firm-specific definitions and audit flags.
 
-## Outputs
+## Output
 
 - `output/six_firm_2006_2025_manual_land_panel.csv`: balanced six-firm by year
   panel with raw owned, optioned, JV, total, and selected share fields.
-- `output/six_firm_2006_2025_manual_land_audit.csv`: row-count, duplicate,
-  source-file, and range checks.
-- `output/six_firm_2006_2025_manual_land_trends.csv`: first/last/min/max
-  selected share by firm.
+
+Row-count, source-file, range, and trend checks are produced by
+`tasks/audits/audit_six_firm_manual_land_panel`.
 
 ## Important definitions
 

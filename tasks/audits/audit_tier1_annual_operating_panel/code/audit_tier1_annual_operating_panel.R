@@ -105,4 +105,8 @@ benchmark_audit <- panel |>
 write_csv_if_changed(coverage_audit, "../output/tier1_annual_operating_coverage_audit.csv")
 write_csv_if_changed(benchmark_audit, "../output/tier1_annual_operating_benchmark_audit.csv")
 
+if (any(!coverage_audit$pass) || any(!benchmark_audit$pass)) {
+  stop("Tier-1 annual operating audit has one or more failed checks.")
+}
+
 cat("Wrote Tier-1 annual operating audits to ../output\n")

@@ -52,4 +52,4 @@ landsea homes,LSEA,1721386,LANDSEA HOMES CORP,TRUE,FALSE,FALSE,2021,2025,Public 
 amh,AMH,1562401,AMERICAN HOMES 4 RENT,TRUE,FALSE,TRUE,2021,,Build-to-rent/REIT-adjacent; keep but flag non-comparable.
 sekisui house u s,,,Sekisui House U.S.,FALSE,TRUE,TRUE,2024,,Foreign public parent; no comparable U.S. SEC 10-K expected.
 smith douglas homes,SDHC,,SMITH DOUGLAS HOMES CORP,TRUE,FALSE,FALSE,2024,,Current public ticker; CIK filled from SEC ticker map when available.
-united homes group,UHG,,UNITED HOMES GROUP INC,TRUE,FALSE,FALSE,2024,,Current public ticker; CIK filled from SEC ticker map when available.
+united homes group,UHG,,UNITED HOMES GROUP INC,TRUE,FALSE,FALSE,2023,,Public builder episode begins with the March 2023 de-SPAC; CIK filled from SEC ticker map when available.

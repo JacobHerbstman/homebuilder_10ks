@@ -4,16 +4,17 @@ Run `make` from `code/`.
 
 This task reads every annual 10-K for D.R. Horton, Lennar, PulteGroup, KB Home, Hovnanian, and NVR for fiscal years 2006-2025. It extracts annual orders, deliveries, backlog, cancellation rates, communities, selling prices, and homebuilding revenue from firm-specific operating tables.
 
-The reviewed 2012-2023 pilot CSV is an audit input only. Production values come from the downloaded SEC HTML files.
+Production values come from the downloaded SEC HTML files. The separate audit task compares them with the reviewed 2012-2023 pilot CSV.
 
 The task writes:
 
 - `six_firm_2006_2025_operating_panel.csv`: one production row for each of the 120 firm-years.
 - `six_firm_2006_2025_operating_candidates.csv`: the same extracted values with filing paths, checksums, source table text, methods, and review fields.
-- `six_firm_2012_2023_operating_benchmark_audit.csv`: cell-level comparisons with the reviewed pilot values.
-- `six_firm_2006_2025_operating_coverage_audit.csv`: metric coverage by firm.
 
-The script stops if any reviewed benchmark fails, any core annual operating measure is missing, or a unit, cancellation-rate, or average-price value falls outside conservative magnitude bounds. This specifically prevents malformed SEC HTML from concatenating adjacent year columns into a plausible-looking production value.
+Benchmark, magnitude, missing-value, and coverage checks are produced by
+`tasks/audits/audit_six_firm_annual_operating_disclosures`.
+
+The producer and audit tasks stop on missing core values or implausible units. The audit also stops if a reviewed benchmark fails. These checks specifically prevent malformed SEC HTML from concatenating adjacent year columns into a plausible-looking production value.
 
 Disclosure formats are handled by firm and era. KB Home's 2006-2011 regional tables are accepted only after the reported consolidated total is found to equal the sum of regional rows. Its malformed 2024-2025 HTML is parsed by table cell rather than flattened text. Pulte's detailed supplemental tables are preferred to five-year summaries when both are present. NVR's 2006 regional table is summed because no explicit consolidated row is present; later filings use the consolidated operating table.
 

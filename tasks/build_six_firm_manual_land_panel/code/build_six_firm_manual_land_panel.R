@@ -4,7 +4,6 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(readr)
   library(tibble)
-  library(tidyr)
 })
 
 source("../../_lib/homebuilder_pipeline_utils.R")
@@ -17,11 +16,6 @@ pilot_firms <- tribble(
   "KBH", "KB Home", 4L,
   "HOV", "Hovnanian", 5L,
   "NVR", "NVR", 6L
-)
-
-expected_panel <- crossing(
-  ticker = pilot_firms$ticker,
-  fiscal_year = 2006:2025
 )
 
 dhi_len_phm <- read_csv(
@@ -237,135 +231,19 @@ panel <- bind_rows(dhi_len_phm, kbh_hov, nvr) |>
   arrange(firm_sort, fiscal_year) |>
   select(-firm_sort)
 
-missing_panel <- expected_panel |>
-  anti_join(panel |> select(ticker, fiscal_year), by = c("ticker", "fiscal_year"))
+if (nrow(panel) != 120L || panel |> count(ticker, fiscal_year) |> filter(n != 1L) |> nrow() > 0L) {
+  stop("Six-firm land panel is not unique and complete for 2006-2025.")
+}
 
-duplicate_panel <- panel |>
-  count(ticker, fiscal_year) |>
-  filter(n > 1)
+if (any(!panel$source_file_exists)) {
+  stop("At least one six-firm land row points to a missing SEC filing.")
+}
 
-trend_summary <- panel |>
-  group_by(ticker, pilot_builder_name, measure_definition, unit_type) |>
-  summarise(
-    firm_years = n(),
-    usable_firm_years = sum(panel_use_flag, na.rm = TRUE),
-    first_usable_year = if_else(
-      usable_firm_years > 0,
-      min(fiscal_year[panel_use_flag], na.rm = TRUE),
-      NA_integer_
-    ),
-    last_usable_year = if_else(
-      usable_firm_years > 0,
-      max(fiscal_year[panel_use_flag], na.rm = TRUE),
-      NA_integer_
-    ),
-    first_usable_share = if_else(
-      usable_firm_years > 0,
-      nonowned_controlled_share[which(panel_use_flag)[1]],
-      NA_real_
-    ),
-    last_usable_share = if_else(
-      usable_firm_years > 0,
-      nonowned_controlled_share[tail(which(panel_use_flag), 1)],
-      NA_real_
-    ),
-    min_usable_share = if_else(
-      usable_firm_years > 0,
-      min(nonowned_controlled_share[panel_use_flag], na.rm = TRUE),
-      NA_real_
-    ),
-    max_usable_share = if_else(
-      usable_firm_years > 0,
-      max(nonowned_controlled_share[panel_use_flag], na.rm = TRUE),
-      NA_real_
-    ),
-    manual_review_rows = sum(manual_review_flag, na.rm = TRUE),
-    approximate_rows = sum(approximate_flag, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  arrange(match(ticker, pilot_firms$ticker))
-
-firm_counts <- panel |>
-  count(ticker, pilot_builder_name, name = "firm_years") |>
-  mutate(
-    audit_check = "firm_year_count",
-    status = if_else(firm_years == 20L, "ok", "fail"),
-    value = as.character(firm_years),
-    detail = "Expected 20 firm-years for each pilot firm."
-  ) |>
-  select(ticker, pilot_builder_name, audit_check, status, value, detail)
-
-audit <- bind_rows(
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "balanced_panel_rows",
-    status = if_else(nrow(panel) == 120L, "ok", "fail"),
-    value = as.character(nrow(panel)),
-    detail = "Expected six firms times fiscal years 2006-2025."
-  ),
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "missing_firm_years",
-    status = if_else(nrow(missing_panel) == 0L, "ok", "fail"),
-    value = as.character(nrow(missing_panel)),
-    detail = paste(paste(missing_panel$ticker, missing_panel$fiscal_year, sep = "-"), collapse = "; ")
-  ),
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "duplicate_firm_years",
-    status = if_else(nrow(duplicate_panel) == 0L, "ok", "fail"),
-    value = as.character(nrow(duplicate_panel)),
-    detail = paste(paste(duplicate_panel$ticker, duplicate_panel$fiscal_year, sep = "-"), collapse = "; ")
-  ),
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "source_files_exist",
-    status = if_else(all(panel$source_file_exists), "ok", "fail"),
-    value = as.character(sum(panel$source_file_exists, na.rm = TRUE)),
-    detail = "Count of firm-years whose local SEC source file exists."
-  ),
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "share_values_in_range",
-    status = if_else(all(panel$share_missing_or_in_range), "ok", "fail"),
-    value = paste0(
-      sum(panel$selected_share_in_range, na.rm = TRUE),
-      "/",
-      sum(panel$selected_share_nonmissing, na.rm = TRUE)
-    ),
-    detail = "Non-missing selected shares between zero and one; missing shares are allowed only when panel_use_flag is false."
-  ),
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "missing_selected_shares",
-    status = if_else(
-      all(!is.na(panel$nonowned_controlled_share) | !panel$panel_use_flag),
-      "ok",
-      "fail"
-    ),
-    value = as.character(sum(is.na(panel$nonowned_controlled_share))),
-    detail = "Rows with no selected share. These should not be marked usable."
-  ),
-  tibble(
-    ticker = NA_character_,
-    pilot_builder_name = NA_character_,
-    audit_check = "usable_panel_rows",
-    status = "ok",
-    value = as.character(sum(panel$panel_use_flag, na.rm = TRUE)),
-    detail = "Firm-years currently safe for the six-firm pilot plot."
-  ),
-  firm_counts
-) |>
-  arrange(coalesce(match(ticker, pilot_firms$ticker), 0L), audit_check)
+if (any(!is.na(panel$nonowned_controlled_share) & (panel$nonowned_controlled_share < 0 | panel$nonowned_controlled_share > 1)) ||
+    any(panel$panel_use_flag & is.na(panel$nonowned_controlled_share))) {
+  stop("Six-firm land shares are out of range or missing on a usable row.")
+}
 
 write_csv_if_changed(panel, "../output/six_firm_2006_2025_manual_land_panel.csv")
-write_csv_if_changed(audit, "../output/six_firm_2006_2025_manual_land_audit.csv")
-write_csv_if_changed(trend_summary, "../output/six_firm_2006_2025_manual_land_trends.csv")
 
-cat("Wrote six-firm hand-coded 2006-2025 land panel outputs to ../output\n")
+cat("Wrote six-firm hand-coded 2006-2025 land panel to ../output\n")

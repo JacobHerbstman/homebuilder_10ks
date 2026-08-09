@@ -31,10 +31,25 @@ expected <- tribble(
     values_to = "expected_value"
   )
 
+expected <- bind_rows(
+  expected,
+  tribble(
+    ~ticker, ~fiscal_year, ~metric, ~expected_value,
+    "BZH", 2018L, "cancellation_rate_pct", 18.3,
+    "BZH", 2019L, "cancellation_rate_pct", 16.1,
+    "BZH", 2020L, "cancellation_rate_pct", 15.8,
+    "BZH", 2021L, "cancellation_rate_pct", 11.1,
+    "BZH", 2022L, "cancellation_rate_pct", 17.6,
+    "BZH", 2023L, "cancellation_rate_pct", 20.3,
+    "BZH", 2024L, "cancellation_rate_pct", 17.7,
+    "BZH", 2025L, "cancellation_rate_pct", 17.7
+  )
+)
+
 audit <- panel |>
-  select(ticker, fiscal_year, orders_units, deliveries_units, backlog_units, accession_number, filing_url, source_table_text) |>
+  select(ticker, fiscal_year, orders_units, deliveries_units, backlog_units, cancellation_rate_pct, accession_number, filing_url, source_table_text) |>
   pivot_longer(
-    cols = c(orders_units, deliveries_units, backlog_units),
+    cols = c(orders_units, deliveries_units, backlog_units, cancellation_rate_pct),
     names_to = "metric",
     values_to = "extracted_value"
   ) |>
@@ -44,6 +59,11 @@ audit <- panel |>
     pass = !is.na(extracted_value) & difference == 0
   ) |>
   arrange(ticker, fiscal_year, metric)
+
+if (any(!audit$pass)) {
+  print(audit |> filter(!pass))
+  stop("At least one five-firm annual operating benchmark failed.")
+}
 
 write_csv_if_changed(audit, "../output/five_firm_annual_operating_benchmark_audit.csv")
 

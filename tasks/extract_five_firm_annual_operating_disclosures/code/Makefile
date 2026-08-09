@@ -1,5 +1,5 @@
 SHELL := bash
-include ../../shell_functions.make
+R := Rscript
 
 all: ../output/five_firm_2006_2025_annual_operating_panel.csv
 

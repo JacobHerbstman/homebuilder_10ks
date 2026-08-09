@@ -137,13 +137,13 @@ crosswalk <- builder_public |>
 token_candidates <- builder_public |>
   filter(!builder_name_key %in% crosswalk$builder_name_key[!is.na(crosswalk$cik10)]) |>
   mutate(builder_token = str_extract(builder_name_key, "^[a-z0-9]+")) |>
-  inner_join(
+  cross_join(
     sec_tickers |>
       mutate(sec_token = str_extract(sec_title_key, "^[a-z0-9]+")) |>
-      filter(!is.na(sec_token)),
-    by = c("builder_token" = "sec_token"),
-    relationship = "many-to-many"
+      filter(!is.na(sec_token))
   ) |>
+  filter(builder_token == sec_token) |>
+  select(-sec_token) |>
   transmute(
     builder_name_key,
     builder_name_clean,
