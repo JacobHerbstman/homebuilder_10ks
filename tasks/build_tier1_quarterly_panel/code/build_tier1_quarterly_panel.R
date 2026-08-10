@@ -36,6 +36,39 @@ if (operating |> count(ticker, calendar_year, calendar_quarter) |> filter(n != 1
   stop("Quarterly operating inputs are not unique by firm and calendar quarter.")
 }
 
+land <- read_csv(
+  "../input/tier1_2018_2025_quarterly_land_panel.csv",
+  show_col_types = FALSE,
+  na = c("", "NA"),
+  col_types = cols(
+    cik10 = col_character(),
+    source_accession_number = col_character(),
+    land_accession_number = col_character(),
+    lagged_quarterly_omega_source_accession_number = col_character()
+  )
+) |>
+  select(
+    ticker, calendar_year, calendar_quarter,
+    land_source_kind, land_share_observed,
+    owned_lots_or_homesites, omega_numerator_lots_or_homesites,
+    total_lots_or_homesites, omega_nonowned_controlled_share,
+    reported_pipeline_lots_or_homesites, land_unit_type,
+    land_measure_definition, land_extraction_method,
+    land_extraction_confidence, land_source_quality,
+    land_component_counts_available, land_component_identity_expected,
+    land_manual_review_flag, land_share_missing_reason,
+    land_accession_number, land_source_url, land_source_local_path,
+    land_source_checksum_sha256,
+    lagged_quarterly_omega_source_calendar_quarter_label,
+    lagged_quarterly_omega_nonowned_controlled_share,
+    lagged_quarterly_omega_source_accession_number,
+    lagged_quarterly_omega_observed
+  )
+
+if (land |> count(ticker, calendar_year, calendar_quarter) |> filter(n != 1) |> nrow() > 0) {
+  stop("Quarterly land inputs are not unique by firm and calendar quarter.")
+}
+
 exits <- read_csv("../input/builder_public_lifecycle_events.csv", show_col_types = FALSE) |>
   filter(builder_name_clean %in% c("M.D.C. Holdings", "Landsea Homes")) |>
   transmute(company = builder_name_clean, public_equity_exit_date = as.Date(event_date))
@@ -81,12 +114,43 @@ panel <- skeleton |>
     relationship = "one-to-one"
   ) |>
   left_join(
+    land,
+    by = c("ticker", "calendar_year", "calendar_quarter"),
+    relationship = "one-to-one"
+  ) |>
+  left_join(
     annual_omega,
     by = c("ticker", "lagged_omega_source_fiscal_year" = "omega_source_fiscal_year"),
     relationship = "many-to-one"
   ) |>
   mutate(
+    across(
+      c(
+        owned_lots_or_homesites,
+        omega_numerator_lots_or_homesites,
+        total_lots_or_homesites,
+        omega_nonowned_controlled_share,
+        reported_pipeline_lots_or_homesites,
+        lagged_quarterly_omega_nonowned_controlled_share
+      ),
+      ~ if_else(public_equity_episode_indicator, .x, NA)
+    ),
+    lagged_quarterly_omega_source_calendar_quarter_label = if_else(
+      public_equity_episode_indicator,
+      lagged_quarterly_omega_source_calendar_quarter_label,
+      NA_character_
+    ),
+    lagged_quarterly_omega_source_accession_number = if_else(
+      public_equity_episode_indicator,
+      lagged_quarterly_omega_source_accession_number,
+      NA_character_
+    ),
+    land_share_observed = public_equity_episode_indicator & coalesce(land_share_observed, FALSE),
+    land_manual_review_flag = public_equity_episode_indicator & coalesce(land_manual_review_flag, FALSE),
+    lagged_quarterly_omega_observed = public_equity_episode_indicator &
+      coalesce(lagged_quarterly_omega_observed, FALSE),
     operating_data_observed = !is.na(orders_units) & !is.na(deliveries_units) & !is.na(backlog_units),
+    quarterly_omega_observed = !is.na(omega_nonowned_controlled_share),
     lagged_annual_omega_observed = !is.na(lagged_annual_omega_nonowned_controlled_share),
     across(
       starts_with("lagged_annual_"),
@@ -105,6 +169,10 @@ if (panel |> count(ticker, calendar_year, calendar_quarter) |> filter(n != 1) |>
 
 if (panel |> filter(!public_equity_episode_indicator, !is.na(operating_accession_number)) |> nrow() > 0) {
   stop("Quarterly operating data were joined outside a reviewed public-equity episode.")
+}
+
+if (panel |> filter(!public_equity_episode_indicator, quarterly_omega_observed) |> nrow() > 0) {
+  stop("Quarterly land data were joined outside a reviewed public-equity episode.")
 }
 
 write_csv_if_changed(panel, "../output/tier1_2018_2025_quarterly_panel.csv")

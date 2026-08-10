@@ -35,6 +35,9 @@ coverage <- panel |>
     backlog_units = sum(!is.na(backlog_units)),
     cancellation_rate_pct = sum(!is.na(cancellation_rate_pct)),
     active_communities = sum(!is.na(active_communities)),
+    quarterly_omega = sum(quarterly_omega_observed),
+    lagged_quarterly_omega = sum(lagged_quarterly_omega_observed),
+    joint_lagged_quarterly_omega_and_operating = sum(lagged_quarterly_omega_observed & operating_data_observed),
     lagged_annual_omega = sum(!is.na(lagged_annual_omega_nonowned_controlled_share)),
     .groups = "drop"
   ) |>
@@ -158,17 +161,19 @@ structural <- tibble(
     "tier1_firms",
     "public_equity_quarters",
     "operating_rows_outside_public_equity_episode",
+    "land_rows_outside_public_equity_episode",
     "missing_core_operating_cells",
     "negative_order_or_delivery_flows",
     "derived_fiscal_q4_rows"
   ),
-  expected_value = c(640, 640, 20, 562, 0, 0, 0, 140),
+  expected_value = c(640, 640, 20, 562, 0, 0, 0, 0, 140),
   actual_value = c(
     nrow(panel),
     n_distinct(paste(panel$ticker, panel$calendar_year, panel$calendar_quarter)),
     n_distinct(panel$ticker),
     sum(panel$public_equity_episode_indicator),
     sum(!panel$public_equity_episode_indicator & !is.na(panel$operating_accession_number)),
+    sum(!panel$public_equity_episode_indicator & panel$quarterly_omega_observed),
     panel |>
       filter(public_equity_episode_indicator) |>
       summarise(n = sum(is.na(orders_units)) + sum(is.na(deliveries_units)) + sum(is.na(backlog_units))) |>
@@ -185,6 +190,7 @@ structural <- tibble(
     "Reviewed Tier-1 universe.",
     "Quarterly public-equity episodes after exact MDC and Landsea acquisition dates.",
     "No extracted operating row survives after a reviewed exit.",
+    "No extracted land-control share survives after a reviewed exit.",
     "Orders, deliveries, and backlog are present in every reviewed public-equity quarter.",
     "Quarter-flow derivations cannot produce negative unit counts.",
     "Fiscal Q4 flows are derived once from annual totals and the first three fiscal quarters."
